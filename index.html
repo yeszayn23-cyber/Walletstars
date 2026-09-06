@@ -132,7 +132,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 13px;
             background-color: white;
             border-radius: 10px;
             overflow: hidden;
@@ -140,7 +140,7 @@
 
         th, td {
             border: 1px solid #e7e0d8;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
         }
 
@@ -154,6 +154,12 @@
             font-weight: bold;
             color: var(--primary-brown);
             margin-bottom: 5px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
         }
     </style>
 </head>
@@ -217,14 +223,14 @@
     <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="card hidden">
         <h2>👑 لوحة تحكم المالكة</h2>
-        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة العضوات المسجلات متزامن لحظياً:</p>
+        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة العضوات والتحكم فيهن:</p>
         <table>
             <thead>
                 <tr>
                     <th>الاسم</th>
                     <th>النجوم</th>
                     <th>الإقصاءات</th>
-                    <th>إجراء</th>
+                    <th>الإجراءات</th>
                 </tr>
             </thead>
             <tbody id="users-table-body">
@@ -244,9 +250,7 @@
     let currentUser = null;
     let allUsers = [];
 
-    // سنستخدم خدمة التخزين السحابي المجانية JSONBin لتزامن كل العضوات لديكِ
-    // ملاحظة: تم إنشاء مسار عام مؤقت للتزامن، أو يمكنك ربطه برابط خاص بك لاحقاً
-    const BIN_URL = "https://api.jsonbin.io/v3/b/65b9e072dc74654018a08f51"; // رابط تخزين سحابي مشترك للمشروع
+    const BIN_URL = "https://api.jsonbin.io/v3/b/65b9e072dc74654018a08f51";
 
     window.onload = async function() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -256,7 +260,6 @@
             }
         }
 
-        // جلب البيانات من السحابة أولاً لضمان التزامن
         await fetchUsersFromCloud();
 
         let savedName = localStorage.getItem('wallet_current_user_name');
@@ -269,34 +272,26 @@
 
     async function fetchUsersFromCloud() {
         try {
-            let response = await fetch(BIN_URL, {
-                headers: { 'X-Access-Key': '$2a$10$C8X3...مفتاح_افتراضي...' } // تليين الاستجابة العامة
-            });
-            // كطريقة أسهل وأضمن للتزامن المباشر بدون تعقيد المفاتيح، نعتمد على جلب البيانات المخزنة سحابياً
+            let response = await fetch(BIN_URL);
             let data = await response.json();
             if (data && data.record) {
                 allUsers = data.record;
             }
         } catch (e) {
-            console.log("استخدام الذاكرة المحلية كبديل مؤقت");
             allUsers = JSON.parse(localStorage.getItem('wallet_all_users')) || [];
         }
     }
 
     async function saveUsersToCloud() {
-        // حفظ محلياً أيضاً كاحتياط
         localStorage.setItem('wallet_all_users', JSON.stringify(allUsers));
-        
         try {
             await fetch(BIN_URL, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(allUsers)
             });
         } catch (e) {
-            console.log("خطأ في التزامن السحابي المباشر");
+            console.log("خطأ في التزامن");
         }
     }
 
@@ -307,13 +302,12 @@
             return;
         }
         localStorage.setItem('wallet_current_user_name', inputName);
-        await fetchUsersFromCloud(); // تحديث القائمة قبل الإضافة
+        await fetchUsersFromCloud();
         setupUserSession(inputName);
     }
 
     async function setupUserSession(name) {
         currentUserName = name;
-        
         await fetchUsersFromCloud();
         currentUser = allUsers.find(u => u.name === currentUserName);
         
@@ -387,7 +381,7 @@
     async function openAdminPanel() {
         document.getElementById('main-screen').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
-        await fetchUsersFromCloud(); // تحديث الجدول فور فتحه ليظهر كل من دخلن حديثاً
+        await fetchUsersFromCloud();
         renderAdminTable();
     }
 
@@ -405,7 +399,12 @@
                 <td>${user.name}</td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
-                <td><button class="btn-danger" style="padding: 5px 10px; font-size: 12px; margin: 0;" onclick="resetUser(${index})">تصفير</button></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="resetUser(${index})" title="تصفير">🔄</button>
+                        <button class="btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0; background-color: #3e2723;" onclick="deleteUser(${index})" title="حذف الاسم">❌</button>
+                    </div>
+                </td>
             </tr>`;
         });
     }
@@ -419,6 +418,21 @@
             if (allUsers[index].name === currentUser.name) {
                 currentUser = allUsers[index];
                 updatePreviews();
+            }
+        }
+    }
+
+    async function deleteUser(index) {
+        let userName = allUsers[index].name;
+        if (confirm(`هل أنتِ متأكدة من حذف العضوة "${userName}" تماماً من الجدول؟`)) {
+            allUsers.splice(index, 1); // إزالة المستخدمة من القائمة
+            await saveUsersToCloud();
+            renderAdminTable();
+            
+            // إذا كانت العضوة المحذوفة هي نفسها التي تفتح التطبيق حالياً، يتم إعادتها لشاشة التسجيل
+            if (currentUser && currentUser.name === userName) {
+                localStorage.removeItem('wallet_current_user_name');
+                location.reload();
             }
         }
     }
