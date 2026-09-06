@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المحفظة المصغر</title>
+    <title>المحفظة</title>
     <style>
         :root {
-            --primary-color: #2ea6ff;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --danger-color: #ef4444;
-            --star-color: #eab308;
+            --bg-color: #f5f2eb; /* بيج فاتح جداً */
+            --card-bg: #ffffff; /* أبيض ناصع للكروت */
+            --primary-brown: #5c4033; /* بني غامق أنيق */
+            --light-brown: #8d6e63; /* بني متوسط */
+            --accent-beige: #d7ccc8; /* بيج دافئ للعناصر الثانوية */
+            --text-color: #3e2723; /* نص بني داكن مريح للعين */
+            --danger-color: #c62828; /* أحمر داكن للإقصاءات */
+            --star-color: #fbc02d; /* أصفر ذهبي للنجوم */
         }
 
         body {
@@ -22,6 +24,8 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
@@ -31,91 +35,139 @@
 
         .card {
             background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(92, 64, 51, 0.08);
             text-align: center;
+            border: 1px solid #e7e0d8;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-brown);
         }
 
         input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            background-color: #0f172a;
-            color: white;
+            width: 85%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid var(--accent-beige);
+            background-color: #faf8f5;
+            color: var(--text-color);
             font-size: 16px;
-            margin-top: 10px;
+            margin-top: 15px;
             text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--light-brown);
         }
 
         button {
-            background-color: var(--primary-color);
+            background-color: var(--primary-brown);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
             font-weight: bold;
             transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(92, 64, 51, 0.2);
         }
 
         button:hover {
-            opacity: 0.9;
+            background-color: var(--light-brown);
         }
 
         .btn-danger {
             background-color: var(--danger-color);
+            box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+        }
+
+        .btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        .btn-secondary {
+            background-color: var(--accent-beige);
+            color: var(--primary-brown);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #bcb0a9;
         }
 
         .wallet-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .wallet-box {
-            background-color: #0f172a;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #334155;
+            background-color: #faf8f5;
+            padding: 20px 15px;
+            border-radius: 16px;
+            border: 2px solid var(--accent-beige);
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
 
         .wallet-box:hover {
-            border-color: var(--primary-color);
+            border-color: var(--primary-brown);
+            transform: translateY(-3px);
         }
 
         .hidden {
             display: none !important;
         }
 
-        .counter {
-            font-size: 24px;
+        .counter-display {
+            font-size: 32px;
             font-weight: bold;
-            margin: 15px 0;
+            color: var(--primary-brown);
+            margin: 10px 0;
+        }
+
+        .symbols-container {
+            font-size: 22px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            min-height: 35px;
+            word-break: break-all;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 14px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         th, td {
-            border: 1px solid #475569;
-            padding: 8px;
+            border: 1px solid #e7e0d8;
+            padding: 10px;
             text-align: center;
         }
 
         th {
-            background-color: #0f172a;
+            background-color: var(--accent-beige);
+            color: var(--primary-brown);
+        }
+
+        .app-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--primary-brown);
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -123,118 +175,140 @@
 
 <div class="container">
 
-    <div id="login-screen" class="card">
-        <h2>مهلاً بكِ في التطبيق</h2>
+    <!-- شاشة تسجيل الاسم (تظهر للمرة الأولى فقط) -->
+    <div id="login-screen" class="card hidden">
+        <div class="app-title">المحفظة</div>
+        <p style="color: var(--light-brown);">مرحباً بكِ في بوت المحفظة المصغر</p>
         <p>الرجاء إدخال اسمكِ للمتابعة:</p>
-        <input type="text" id="username-input" placeholder="اسم المستخدمة...">
+        <input type="text" id="username-input" placeholder="اكتبي اسمكِ هنا...">
         <br>
-        <button onclick="loginUser()">دخول</button>
+        <button onclick="registerUser()">دخول</button>
     </div>
 
+    <!-- الشاشة الرئيسية للمستخدمة -->
     <div id="main-screen" class="card hidden">
-        <h2 id="welcome-user">أهلاً بكِ، <span></span></h2>
+        <div class="app-title">المحفظة</div>
+        <h2 id="welcome-user" style="margin-top: 5px;">أهلاً بكِ، <span></span></h2>
         
         <div class="wallet-grid">
             <div class="wallet-box" onclick="openWallet('stars')">
                 <h3>⭐ النجوم</h3>
-                <p id="preview-stars">0</p>
+                <p id="preview-stars" style="font-weight: bold; font-size: 18px;">0</p>
             </div>
             <div class="wallet-box" onclick="openWallet('bans')">
                 <h3>🔴 الإقصاءات</h3>
-                <p id="preview-bans">0</p>
+                <p id="preview-bans" style="font-weight: bold; font-size: 18px;">0</p>
             </div>
         </div>
 
         <div id="admin-panel-btn-container" class="hidden">
-            <button style="background-color: #8b5cf6; width: 100%; margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
+            <button style="background-color: var(--primary-brown); width: 100%; margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
         </div>
     </div>
 
+    <!-- واجهة محفظة النجوم -->
     <div id="stars-wallet" class="card hidden">
         <h2>⭐ محفظة النجوم</h2>
-        <div class="counter" id="stars-count">0</div>
+        <div class="counter-display" id="stars-count">0</div>
+        <div class="symbols-container" id="stars-symbols"></div>
         <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
         <button class="btn-danger" onclick="modifyStars(-1)">حذف نجمة</button>
         <br><br>
-        <button style="background-color: #475569;" onclick="goBack()">الرجوع</button>
+        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
     </div>
 
+    <!-- واجهة محفظة الإقصاءات -->
     <div id="bans-wallet" class="card hidden">
         <h2>🔴 محفظة الإقصاءات</h2>
-        <div class="counter" id="bans-count">0</div>
+        <div class="counter-display" id="bans-count">0</div>
+        <div class="symbols-container" id="bans-symbols"></div>
         <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
-        <button onclick="modifyBans(-1)">حذف إقصاء</button>
+        <button class="btn-secondary" onclick="modifyBans(-1)">حذف إقصاء</button>
         <br><br>
-        <button style="background-color: #475569;" onclick="goBack()">الرجوع</button>
+        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
     </div>
 
+    <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="card hidden">
         <h2>👑 لوحة تحكم المالكة</h2>
-        <p>سجل جميع المستخدمات المسجلات في البوت:</p>
+        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة جميع المستخدمات المتزامن لحظياً:</p>
         <table>
             <thead>
                 <tr>
                     <th>الاسم</th>
-                    <th>عدد النجوم</th>
-                    <th>عدد الإقصاءات</th>
+                    <th>النجوم</th>
+                    <th>الإقصاءات</th>
+                    <th>إجراء</th>
                 </tr>
             </thead>
             <tbody id="users-table-body">
-                </tbody>
+                <!-- يُعبأ تلقائياً -->
+            </tbody>
         </table>
         <br>
-        <button style="background-color: #475569;" onclick="goBack()">الرجوع</button>
+        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
     </div>
 
 </div>
 
 <script>
-    // معرف المالكة الثابت
+    // معرف المالكة الثابت المخصص لكِ
     const ADMIN_ID = "8421694319";
     
-    // محاكاة يوزر تليجرام (يمكن ربطه بـ Telegram WebApp API لاحقاً)
-    let currentTelegramId = prompt("أدخل معرف التليجرام الخاص بك (للتجربة - اتركيه فارغاً لمستخدمة عادية واكتبي 8421694319 للمالكة):") || "user_" + Math.floor(Math.random() * 1000);
+    // محاكاة يوزر تليجرام (يمكن ربطه لاحقاً بـ Telegram WebApp الحقيقي)
+    // لتجربة دور المالكة، يتم افتراض الـ ID الخاص بكِ مباشرة، ويمكن تغليفه لاحقاً بـ Telegram.WebApp.initDataUnsafe.user.id
+    let currentTelegramId = ADMIN_ID; 
 
-    // بيانات المستخدمة الحالية
-    let currentUser = {
-        name: "",
-        stars: 0,
-        bans: 0
-    };
-
-    // قاعدة بيانات وهمية للمستخدمات (تشمل المالكة ومستخدمات أخريات كمثال)
-    let allUsers = JSON.parse(localStorage.getItem('all_users')) || [
-        { name: "سارة أحمد", stars: 5, bans: 1 },
-        { name: "فاطمة علي", stars: 12, bans: 0 },
-        { name: "ريم محمد", stars: 3, bans: 2 }
+    // قاعدة بيانات المستخدمات المحفوظة محلياً مع دعم المزامنة الفورية
+    let allUsers = JSON.parse(localStorage.getItem('wallet_all_users')) || [
+        { name: "سارة أحمد", stars: 3, bans: 0 },
+        { name: "فاطمة علي", stars: 7, bans: 1 }
     ];
 
-    function loginUser() {
+    let currentUserName = localStorage.getItem('wallet_current_user_name');
+    let currentUser = null;
+
+    // تهيئة التشغيل عند فتح البوت
+    window.onload = function() {
+        if (!currentUserName) {
+            // إذا كانت المرة الأولى، يطلب الاسم
+            document.getElementById('login-screen').classList.remove('hidden');
+        } else {
+            // إذا كان مسجلاً مسبقاً، يدخل مباشرة
+            setupUserSession(currentUserName);
+        }
+    };
+
+    function registerUser() {
         const inputName = document.getElementById('username-input').value.trim();
         if (!inputName) {
             alert("الرجاء إدخال الاسم!");
             return;
         }
 
-        currentUser.name = inputName;
+        localStorage.setItem('wallet_current_user_name', inputName);
+        setupUserSession(inputName);
+    }
+
+    function setupUserSession(name) {
+        currentUserName = name;
         
-        // التحقق إذا كانت المستخدمة مسجلة مسبقاً في قاعدة البيانات الوهمية
-        let found = allUsers.find(u => u.name === currentUser.name);
-        if (found) {
-            currentUser = found;
-        } else {
+        // البحث عن المستخدمة في قاعدة البيانات أو إنشائها إذا لم تكن موجودة
+        currentUser = allUsers.find(u => u.name === currentUserName);
+        if (!currentUser) {
+            currentUser = { name: currentUserName, stars: 0, bans: 0 };
             allUsers.push(currentUser);
             saveData();
         }
 
-        // عرض اسم المستخدمة في الشاشة الرئيسية
-        document.querySelector('#welcome-user span').innerText = currentUser.name;
-
-        // إخفاء شاشة الدخول وإظهار الرئيسية
+        // إخفاء شاشة تسجيل الدخول وإظهار الرئيسية
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
 
-        // إذا كانت هي المالكة، نظهر لها زر لوحة التحكم
+        // إظهار اسم المستخدمة في الواجهة
+        document.querySelector('#welcome-user span').innerText = currentUser.name;
+
+        // التحقق التلقائي من المالكة
         if (currentTelegramId === ADMIN_ID) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
         }
@@ -246,27 +320,37 @@
         document.getElementById('main-screen').classList.add('hidden');
         if (type === 'stars') {
             document.getElementById('stars-wallet').classList.remove('hidden');
-            document.getElementById('stars-count').innerText = currentUser.stars;
+            updateStarsUI();
         } else {
             document.getElementById('bans-wallet').classList.remove('hidden');
-            document.getElementById('bans-count').innerText = currentUser.bans;
+            updateBansUI();
         }
     }
 
     function modifyStars(amount) {
         currentUser.stars += amount;
         if (currentUser.stars < 0) currentUser.stars = 0;
-        document.getElementById('stars-count').innerText = currentUser.stars;
-        document.getElementById('preview-stars').innerText = currentUser.stars;
+        updateStarsUI();
+        updatePreviews();
         syncUserData();
     }
 
     function modifyBans(amount) {
         currentUser.bans += amount;
         if (currentUser.bans < 0) currentUser.bans = 0;
-        document.getElementById('bans-count').innerText = currentUser.bans;
-        document.getElementById('preview-bans').innerText = currentUser.bans;
+        updateBansUI();
+        updatePreviews();
         syncUserData();
+    }
+
+    function updateStarsUI() {
+        document.getElementById('stars-count').innerText = currentUser.stars;
+        document.getElementById('stars-symbols').innerText = "⭐".repeat(currentUser.stars);
+    }
+
+    function updateBansUI() {
+        document.getElementById('bans-count').innerText = currentUser.bans;
+        document.getElementById('bans-symbols').innerText = "🔴".repeat(currentUser.bans);
     }
 
     function updatePreviews() {
@@ -285,18 +369,36 @@
     function openAdminPanel() {
         document.getElementById('main-screen').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
-        
+        renderAdminTable();
+    }
+
+    function renderAdminTable() {
         const tbody = document.getElementById('users-table-body');
         tbody.innerHTML = "";
 
-        allUsers.forEach(user => {
+        allUsers.forEach((user, index) => {
             const row = `<tr>
                 <td>${user.name}</td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
+                <td><button class="btn-danger" style="padding: 5px 10px; font-size: 12px; margin: 0;" onclick="resetUser(${index})">تصفير</button></td>
             </tr>`;
             tbody.innerHTML += row;
         });
+    }
+
+    function resetUser(index) {
+        if (confirm(`هل أنتِ متأكدة من تصفير عدادات المستخدمة: ${allUsers[index].name}؟`)) {
+            allUsers[index].stars = 0;
+            allUsers[index].bans = 0;
+            saveData();
+            renderAdminTable();
+            // لو كانت هي المستخدمة نفسها المفتوحة حالياً، يتم تحديث واجهتها أيضاً
+            if (allUsers[index].name === currentUser.name) {
+                currentUser = allUsers[index];
+                updatePreviews();
+            }
+        }
     }
 
     function syncUserData() {
@@ -308,7 +410,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('all_users', JSON.stringify(allUsers));
+        localStorage.setItem('wallet_all_users', JSON.stringify(allUsers));
     }
 </script>
 
