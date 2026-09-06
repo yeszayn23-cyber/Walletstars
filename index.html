@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المحفظة</title>
+    <!-- تضمين مكتبة تليجرام الرسمية للتعرف على يوزر المستخدمة الحقيقي -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #f5f2eb; /* بيج فاتح جداً */
-            --card-bg: #ffffff; /* أبيض ناصع للكروت */
-            --primary-brown: #5c4033; /* بني غامق أنيق */
-            --light-brown: #8d6e63; /* بني متوسط */
-            --accent-beige: #d7ccc8; /* بيج دافئ للعناصر الثانوية */
-            --text-color: #3e2723; /* نص بني داكن مريح للعين */
-            --danger-color: #c62828; /* أحمر داكن للإقصاءات */
-            --star-color: #fbc02d; /* أصفر ذهبي للنجوم */
+            --bg-color: #f5f2eb;
+            --card-bg: #ffffff;
+            --primary-brown: #5c4033;
+            --light-brown: #8d6e63;
+            --accent-beige: #d7ccc8;
+            --text-color: #3e2723;
+            --danger-color: #c62828;
+            --star-color: #fbc02d;
         }
 
         body {
@@ -43,7 +45,7 @@
             border: 1px solid #e7e0d8;
         }
 
-        h1, h2, h3 {
+        h2, h3 {
             color: var(--primary-brown);
         }
 
@@ -58,11 +60,6 @@
             margin-top: 15px;
             text-align: center;
             outline: none;
-            transition: 0.3s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--light-brown);
         }
 
         button {
@@ -85,21 +82,12 @@
 
         .btn-danger {
             background-color: var(--danger-color);
-            box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
-        }
-
-        .btn-danger:hover {
-            background-color: #b71c1c;
         }
 
         .btn-secondary {
             background-color: var(--accent-beige);
             color: var(--primary-brown);
             box-shadow: none;
-        }
-
-        .btn-secondary:hover {
-            background-color: #bcb0a9;
         }
 
         .wallet-grid {
@@ -120,7 +108,6 @@
 
         .wallet-box:hover {
             border-color: var(--primary-brown);
-            transform: translateY(-3px);
         }
 
         .hidden {
@@ -175,7 +162,7 @@
 
 <div class="container">
 
-    <!-- شاشة تسجيل الاسم (تظهر للمرة الأولى فقط) -->
+    <!-- شاشة تسجيل الاسم (تظهر للمرة الأولى فقط للمستخدمات الجدد) -->
     <div id="login-screen" class="card hidden">
         <div class="app-title">المحفظة</div>
         <p style="color: var(--light-brown);">مرحباً بكِ في بوت المحفظة المصغر</p>
@@ -201,6 +188,7 @@
             </div>
         </div>
 
+        <!-- زر لوحة التحكم يظهر حصرياً للمالكة بناءً على الـ ID -->
         <div id="admin-panel-btn-container" class="hidden">
             <button style="background-color: var(--primary-brown); width: 100%; margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
         </div>
@@ -231,7 +219,7 @@
     <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="card hidden">
         <h2>👑 لوحة تحكم المالكة</h2>
-        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة جميع المستخدمات المتزامن لحظياً:</p>
+        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة العضوات المسجلات:</p>
         <table>
             <thead>
                 <tr>
@@ -241,9 +229,7 @@
                     <th>إجراء</th>
                 </tr>
             </thead>
-            <tbody id="users-table-body">
-                <!-- يُعبأ تلقائياً -->
-            </tbody>
+            <tbody id="users-table-body"></tbody>
         </table>
         <br>
         <button class="btn-secondary" onclick="goBack()">الرجوع</button>
@@ -252,30 +238,35 @@
 </div>
 
 <script>
-    // معرف المالكة الثابت المخصص لكِ
+    // اليوزر الخاص بكِ كمالكة
     const ADMIN_ID = "8421694319";
     
-    // محاكاة يوزر تليجرام (يمكن ربطه لاحقاً بـ Telegram WebApp الحقيقي)
-    // لتجربة دور المالكة، يتم افتراض الـ ID الخاص بكِ مباشرة، ويمكن تغليفه لاحقاً بـ Telegram.WebApp.initDataUnsafe.user.id
-    let currentTelegramId = ADMIN_ID; 
-
-    // قاعدة بيانات المستخدمات المحفوظة محلياً مع دعم المزامنة الفورية
-    let allUsers = JSON.parse(localStorage.getItem('wallet_all_users')) || [
-        { name: "سارة أحمد", stars: 3, bans: 0 },
-        { name: "فاطمة علي", stars: 7, bans: 1 }
-    ];
-
-    let currentUserName = localStorage.getItem('wallet_current_user_name');
+    let currentTelegramId = "";
+    let currentUserName = "";
     let currentUser = null;
 
-    // تهيئة التشغيل عند فتح البوت
+    // قاعدة بيانات حقيقية تبدأ فارغة تماماً بدون أي أسماء وهمية
+    let allUsers = JSON.parse(localStorage.getItem('wallet_all_users')) || [];
+
     window.onload = function() {
-        if (!currentUserName) {
-            // إذا كانت المرة الأولى، يطلب الاسم
+        // تهيئة تطبيق تليجرام للتأكد من الهوية الحقيقية
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+                currentTelegramId = tgUser.id.toString();
+            }
+        }
+
+        // التحقق مما إذا كان الاسم محفوظاً مسبقاً في الذاكرة المحلية
+        let savedName = localStorage.getItem('wallet_current_user_name');
+
+        if (!savedName) {
+            // إذا لم تقم بتسجيل اسمها من قبل، نطلب منها إدخاله للمرة الأولى فقط
             document.getElementById('login-screen').classList.remove('hidden');
         } else {
-            // إذا كان مسجلاً مسبقاً، يدخل مباشرة
-            setupUserSession(currentUserName);
+            // إذا كان محفوظاً، ندخلها مباشرة دون إزعاجها
+            setupUserSession(savedName);
         }
     };
 
@@ -285,7 +276,6 @@
             alert("الرجاء إدخال الاسم!");
             return;
         }
-
         localStorage.setItem('wallet_current_user_name', inputName);
         setupUserSession(inputName);
     }
@@ -293,22 +283,20 @@
     function setupUserSession(name) {
         currentUserName = name;
         
-        // البحث عن المستخدمة في قاعدة البيانات أو إنشائها إذا لم تكن موجودة
+        // البحث عن المستخدمة في قاعدة البيانات
         currentUser = allUsers.find(u => u.name === currentUserName);
         if (!currentUser) {
+            // إذا دخلت لأول مرة يتم إضافتها للقائمة الحقيقية
             currentUser = { name: currentUserName, stars: 0, bans: 0 };
             allUsers.push(currentUser);
             saveData();
         }
 
-        // إخفاء شاشة تسجيل الدخول وإظهار الرئيسية
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
-
-        // إظهار اسم المستخدمة في الواجهة
         document.querySelector('#welcome-user span').innerText = currentUser.name;
 
-        // التحقق التلقائي من المالكة
+        // إظهار زر لوحة التحكم حصرياً لكِ بناءً على الـ ID الخاص بكِ
         if (currentTelegramId === ADMIN_ID) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
         }
@@ -375,25 +363,28 @@
     function renderAdminTable() {
         const tbody = document.getElementById('users-table-body');
         tbody.innerHTML = "";
+        
+        if (allUsers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات مسجلات حتى الآن</td></tr>`;
+            return;
+        }
 
         allUsers.forEach((user, index) => {
-            const row = `<tr>
+            tbody.innerHTML += `<tr>
                 <td>${user.name}</td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
                 <td><button class="btn-danger" style="padding: 5px 10px; font-size: 12px; margin: 0;" onclick="resetUser(${index})">تصفير</button></td>
             </tr>`;
-            tbody.innerHTML += row;
         });
     }
 
     function resetUser(index) {
-        if (confirm(`هل أنتِ متأكدة من تصفير عدادات المستخدمة: ${allUsers[index].name}؟`)) {
+        if (confirm(`هل أنتِ متأكدة من تصفير عدادات العضوة: ${allUsers[index].name}؟`)) {
             allUsers[index].stars = 0;
             allUsers[index].bans = 0;
             saveData();
             renderAdminTable();
-            // لو كانت هي المستخدمة نفسها المفتوحة حالياً، يتم تحديث واجهتها أيضاً
             if (allUsers[index].name === currentUser.name) {
                 currentUser = allUsers[index];
                 updatePreviews();
