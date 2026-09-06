@@ -261,6 +261,10 @@
             padding-top: 15px;
             border-top: 1px dashed var(--soft-border);
         }
+        
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -355,8 +359,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const ADMIN_ID = "8421694319";
-    let currentTelegramId = "";
+    // يوزر المالكة المحدد بدقة
+    const ADMIN_USERNAME = "zay_yes3d";
+    let currentUserUsernameTelegram = "";
     let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
     let allUsers = {};
     let globalBgImage = "";
@@ -379,15 +384,13 @@
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                currentTelegramId = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+                currentUserUsernameTelegram = window.Telegram.WebApp.initDataUnsafe.user.username || "";
             }
         }
 
-        // تطبيق الخلفية المخزنة محلياً مؤقتاً لسرعة التحميل
         const localBg = localStorage.getItem('wallet_custom_bg');
         if (localBg) applyBg(localBg);
 
-        // الاستماع لقاعدة البيانات بشكل شامل
         const dbRef = ref(db);
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val() || {};
@@ -416,7 +419,6 @@
         }
     }
 
-    // التنقل بين الشاشات لمنع التداخل نهائياً
     window.switchScreen = function(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -455,8 +457,11 @@
 
         document.querySelector('#welcome-user span').innerText = currentUser.name;
         
-        if (currentTelegramId === ADMIN_ID) {
+        // التحقق الدقيق من يوزر تيليجرام الخاص بكِ حصراً لتظهر لوحة التحكم
+        if (currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
+        } else {
+            document.getElementById('admin-panel-btn-container').classList.add('hidden');
         }
 
         updatePreviews();
@@ -541,8 +546,8 @@
     window.resetUser = async function(userName) {
         if (confirm(`تصفير عدادات العضوة: ${userName}؟`)) {
             if(allUsers[userName]) {
-                allUsers[userName].stars = 0;
-                allUsers[userName].bans = 0;
+                allUsers.stars = 0;
+                allUsers.bans = 0;
                 await saveDataToCloud();
                 renderAdminTable();
                 updatePreviews();
@@ -563,7 +568,6 @@
         }
     }
 
-    // دوال إدارة الخلفية (رفع، تعيين للجميع، أو حذف)
     window.previewAndSaveBg = function(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -571,16 +575,14 @@
         const reader = new FileReader();
         reader.onload = async function(e) {
             const base64Image = e.target.result;
-            
-            // سؤال المالكة أو المستخدمة: هل ترغبين بتطبيق الخلفية للجميع عبر السحابة أم على جهازك فقط؟
             const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لجهازك فقط)");
 
-            if (applyToAll && currentTelegramId === ADMIN_ID) {
+            if (applyToAll && currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
                 try {
                     await set(ref(db, 'globalBackground'), base64Image);
                     alert("تم تحديث الخلفية لجميع العضوات بنجاح!");
                 } catch(err) {
-                    alert("حدث خطأ أثناء رفع الخلفية للسحابة (قد تكون حجم الصورة كبير جداً).");
+                    alert("حجم الصورة كبير جداً للسحابة، جربي صورة أصغر.");
                 }
             } else {
                 localStorage.setItem('wallet_custom_bg', base64Image);
@@ -596,7 +598,7 @@
             localStorage.removeItem('wallet_custom_bg');
             document.body.style.backgroundImage = "none";
             
-            if (currentTelegramId === ADMIN_ID) {
+            if (currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
                 try {
                     await set(ref(db, 'globalBackground'), null);
                 } catch(e) {}
