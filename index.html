@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المحفظة</title>
+    <title>المحفظة السحابية</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #f5f2eb;
+            --bg-color: #f7f4ed;
             --card-bg: #ffffff;
-            --primary-brown: #5c4033;
-            --light-brown: #8d6e63;
-            --accent-beige: #d7ccc8;
-            --text-color: #3e2723;
-            --danger-color: #c62828;
-            --star-color: #fbc02d;
+            --primary-brown: #4a3327;
+            --light-brown: #8c6d59;
+            --accent-beige: #e6dfd5;
+            --soft-border: #dcd4c5;
+            --text-color: #332219;
+            --danger-color: #b73232;
+            --star-gold: #d4a373;
+            --shadow: 0 10px 30px rgba(74, 51, 39, 0.06);
         }
 
         body {
@@ -31,64 +33,101 @@
 
         .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
         }
 
         .card {
             background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 24px;
+            padding: 30px 22px;
             margin-bottom: 20px;
-            box-shadow: 0 8px 20px rgba(92, 64, 51, 0.08);
+            box-shadow: var(--shadow);
             text-align: center;
-            border: 1px solid #e7e0d8;
+            border: 1px solid var(--soft-border);
+            animation: fadeIn 0.4s ease-in-out;
         }
 
-        h2, h3 {
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 800;
             color: var(--primary-brown);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            color: var(--light-brown);
+            margin-bottom: 25px;
         }
 
         input[type="text"] {
-            width: 85%;
-            padding: 12px;
-            border-radius: 12px;
+            width: 90%;
+            padding: 14px 18px;
+            border-radius: 14px;
             border: 2px solid var(--accent-beige);
             background-color: #faf8f5;
             color: var(--text-color);
             font-size: 16px;
-            margin-top: 15px;
+            margin-bottom: 15px;
             text-align: center;
             outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-brown);
+            background-color: #fff;
         }
 
         button {
             background-color: var(--primary-brown);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 15px;
             cursor: pointer;
-            margin-top: 15px;
-            font-weight: bold;
-            transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(92, 64, 51, 0.2);
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(74, 51, 39, 0.15);
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         button:hover {
-            background-color: var(--light-brown);
+            background-color: #38251c;
         }
 
         .btn-danger {
             background-color: var(--danger-color);
+            box-shadow: 0 4px 12px rgba(183, 50, 50, 0.15);
+        }
+
+        .btn-danger:hover {
+            background-color: #992828;
         }
 
         .btn-secondary {
             background-color: var(--accent-beige);
             color: var(--primary-brown);
             box-shadow: none;
+            margin-top: 10px;
         }
 
+        .btn-secondary:hover {
+            background-color: #d4cbc0;
+        }
+
+        /* تنسيق شبكة المحافظ */
         .wallet-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -97,16 +136,32 @@
         }
 
         .wallet-box {
-            background-color: #faf8f5;
-            padding: 20px 15px;
-            border-radius: 16px;
-            border: 2px solid var(--accent-beige);
+            background: linear-gradient(145deg, #faf8f5, #f3efe6);
+            padding: 22px 12px;
+            border-radius: 18px;
+            border: 1px solid var(--soft-border);
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
 
         .wallet-box:hover {
             border-color: var(--primary-brown);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(74, 51, 39, 0.08);
+        }
+
+        .wallet-box h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: var(--primary-brown);
+        }
+
+        .wallet-box p {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-brown);
         }
 
         .hidden {
@@ -114,52 +169,83 @@
         }
 
         .counter-display {
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 42px;
+            font-weight: 800;
             color: var(--primary-brown);
-            margin: 10px 0;
+            margin: 15px 0 5px 0;
         }
 
         .symbols-container {
-            font-size: 22px;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            min-height: 35px;
+            font-size: 20px;
+            letter-spacing: 4px;
+            margin: 20px 0;
+            min-height: 45px;
+            padding: 10px;
+            background-color: #faf8f5;
+            border-radius: 12px;
+            border: 1px dashed var(--soft-border);
             word-break: break-all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* جدول لوحة التحكم */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--soft-border);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
             font-size: 13px;
             background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
+            text-align: center;
         }
 
         th, td {
-            border: 1px solid #e7e0d8;
-            padding: 8px;
-            text-align: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--accent-beige);
         }
 
         th {
             background-color: var(--accent-beige);
             color: var(--primary-brown);
+            font-weight: 700;
         }
 
-        .app-title {
-            font-size: 26px;
-            font-weight: bold;
-            color: var(--primary-brown);
-            margin-bottom: 5px;
+        tr:last-child td {
+            border-bottom: none;
         }
 
         .action-btns {
             display: flex;
-            gap: 5px;
+            gap: 6px;
             justify-content: center;
+        }
+
+        .mini-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 8px;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .welcome-badge {
+            display: inline-block;
+            background-color: var(--accent-beige);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--primary-brown);
+            margin-bottom: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -170,31 +256,29 @@
     <!-- شاشة تسجيل الاسم -->
     <div id="login-screen" class="card">
         <div class="app-title">المحفظة</div>
-        <p style="color: var(--light-brown);">مرحباً بكِ في بوت المحفظة المصغر</p>
-        <p>الرجاء إدخال اسمكِ للمتابعة:</p>
+        <div class="app-subtitle">نظام المتابعة والتنظيم السحابي</div>
         <input type="text" id="username-input" placeholder="اكتبي اسمكِ هنا...">
-        <br>
-        <button onclick="registerUser()">دخول</button>
+        <button onclick="registerUser()">دخول للمحفظة</button>
     </div>
 
     <!-- الشاشة الرئيسية للمستخدمة -->
     <div id="main-screen" class="card hidden">
         <div class="app-title">المحفظة</div>
-        <h2 id="welcome-user" style="margin-top: 5px;">أهلاً بكِ، <span></span></h2>
+        <div class="welcome-badge" id="welcome-user">أهلاً بكِ، <span></span></div>
         
         <div class="wallet-grid">
             <div class="wallet-box" onclick="openWallet('stars')">
                 <h3>⭐ النجوم</h3>
-                <p id="preview-stars" style="font-weight: bold; font-size: 18px;">0</p>
+                <p id="preview-stars">0</p>
             </div>
             <div class="wallet-box" onclick="openWallet('bans')">
                 <h3>🔴 الإقصاءات</h3>
-                <p id="preview-bans" style="font-weight: bold; font-size: 18px;">0</p>
+                <p id="preview-bans">0</p>
             </div>
         </div>
 
         <div id="admin-panel-btn-container" class="hidden">
-            <button style="background-color: var(--primary-brown); width: 100%; margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
+            <button style="margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
         </div>
     </div>
 
@@ -203,10 +287,11 @@
         <h2>⭐ محفظة النجوم</h2>
         <div class="counter-display" id="stars-count">0</div>
         <div class="symbols-container" id="stars-symbols"></div>
-        <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
-        <button class="btn-danger" onclick="modifyStars(-1)">حذف نجمة</button>
-        <br><br>
-        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
+            <button class="btn-danger" onclick="modifyStars(-1)">حذف</button>
+        </div>
+        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
     </div>
 
     <!-- محفظة الإقصاءات -->
@@ -214,36 +299,38 @@
         <h2>🔴 محفظة الإقصاءات</h2>
         <div class="counter-display" id="bans-count">0</div>
         <div class="symbols-container" id="symbols-container-bans"></div>
-        <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
-        <button class="btn-secondary" onclick="modifyBans(-1)">حذف إقصاء</button>
-        <br><br>
-        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
+            <button class="btn-secondary" onclick="modifyBans(-1)" style="margin-top:0;">حذف</button>
+        </div>
+        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
     </div>
 
     <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="card hidden">
-        <h2>👑 لوحة تحكم المالكة</h2>
-        <p style="font-size: 13px; color: var(--light-brown);">جدول متابعة العضوات والتحكم فيهن:</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>النجوم</th>
-                    <th>الإقصاءات</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody id="users-table-body">
-                <tr><td colspan="4">جاري تحميل البيانات من السحابة...</td></tr>
-            </tbody>
-        </table>
-        <br>
-        <button class="btn-secondary" onclick="goBack()">الرجوع</button>
+        <h2>👑 لوحة التحكم</h2>
+        <div class="app-subtitle">متابعة العضوات والتحكم الشامل</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>النجوم</th>
+                        <th>الإقصاءات</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <tr><td colspan="4" style="color: var(--light-brown);">جاري التحميل...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
     </div>
 
 </div>
 
-<!-- سكربت Firebase المتصل بالسحابة بشكل مباشر ودائم -->
+<!-- سكربت Firebase والمنطق البرمجي -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -265,7 +352,7 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const db = getDatabase(app, "https://mywallet-11d29-default-rtdb.firebaseio.com/");
 
     window.onload = function() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -275,7 +362,6 @@
             }
         }
 
-        // الربط المباشر بقاعدة البيانات وجلب البيانات فوراً وتحديثها لحظياً
         const usersRef = ref(db, 'users');
         onValue(usersRef, (snapshot) => {
             const data = snapshot.val();
@@ -284,7 +370,6 @@
             if (currentUserName && allUsers[currentUserName]) {
                 setupUserSession(currentUserName, false);
             } else if (currentUserName) {
-                // إذا كان الاسم مخزناً محلياً وغير موجود بالسحابة، يتم إضافته تلقائياً
                 allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
                 saveUsersToCloud();
                 setupUserSession(currentUserName, false);
@@ -296,7 +381,7 @@
         try {
             await set(ref(db, 'users'), allUsers);
         } catch (e) {
-            console.error("خطأ في الحفظ السحابي:", e);
+            console.error("خطأ في الحفظ:", e);
         }
     }
 
@@ -311,8 +396,8 @@
 
         if (!allUsers[currentUserName]) {
             allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-            await saveUsersToCloud();
         }
+        await saveUsersToCloud();
         setupUserSession(currentUserName, true);
     }
 
@@ -321,10 +406,7 @@
         let currentUser = allUsers[currentUserName];
         if (!currentUser) return;
 
-        if (hideLogin) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-screen').classList.remove('hidden');
-        } else if (localStorage.getItem('wallet_current_user_name')) {
+        if (hideLogin || localStorage.getItem('wallet_current_user_name')) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-screen').classList.remove('hidden');
         }
@@ -353,7 +435,9 @@
     }
 
     window.modifyStars = async function(amount) {
-        if (!allUsers[currentUserName]) return;
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        }
         allUsers[currentUserName].stars += amount;
         if (allUsers[currentUserName].stars < 0) allUsers[currentUserName].stars = 0;
         
@@ -363,7 +447,9 @@
     }
 
     window.modifyBans = async function(amount) {
-        if (!allUsers[currentUserName]) return;
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        }
         allUsers[currentUserName].bans += amount;
         if (allUsers[currentUserName].bans < 0) allUsers[currentUserName].bans = 0;
         
@@ -376,14 +462,14 @@
         let u = allUsers[currentUserName];
         if(!u) return;
         document.getElementById('stars-count').innerText = u.stars;
-        document.getElementById('stars-symbols').innerText = "⭐".repeat(u.stars);
+        document.getElementById('stars-symbols').innerText = u.stars > 0 ? "⭐".repeat(u.stars) : "لا توجد نجوم بعد";
     }
 
     function updateBansUI() {
         let u = allUsers[currentUserName];
         if(!u) return;
         document.getElementById('bans-count').innerText = u.bans;
-        document.getElementById('symbols-container-bans').innerText = "🔴".repeat(u.bans);
+        document.getElementById('symbols-container-bans').innerText = u.bans > 0 ? "🔴".repeat(u.bans) : "سجل نظيف تماماً";
     }
 
     function updatePreviews() {
@@ -413,20 +499,20 @@
         
         const userKeys = Object.keys(allUsers);
         if (userKeys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات مسجلات حتى الآن</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات مسجلات</td></tr>`;
             return;
         }
 
         userKeys.forEach((userName) => {
             const user = allUsers[userName];
             tbody.innerHTML += `<tr>
-                <td>${user.name}</td>
+                <td><strong>${user.name}</strong></td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="resetUser('${userName}')" title="تصفير">🔄</button>
-                        <button class="btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0; background-color: #3e2723;" onclick="deleteUser('${userName}')" title="حذف الاسم">❌</button>
+                        <button class="btn-secondary mini-btn" onclick="resetUser('${userName}')" title="تصفير">🔄</button>
+                        <button class="btn-danger mini-btn" onclick="deleteUser('${userName}')" title="حذف">❌</button>
                     </div>
                 </td>
             </tr>`;
@@ -434,7 +520,7 @@
     }
 
     window.resetUser = async function(userName) {
-        if (confirm(`هل أنتِ متأكدة من تصفير عدادات العضوة: ${userName}؟`)) {
+        if (confirm(`تصفير عدادات العضوة: ${userName}؟`)) {
             if(allUsers[userName]) {
                 allUsers[userName].stars = 0;
                 allUsers[userName].bans = 0;
@@ -446,7 +532,7 @@
     }
 
     window.deleteUser = async function(userName) {
-        if (confirm(`هل أنتِ متأكدة من حذف العضوة "${userName}" تماماً من الجدول؟`)) {
+        if (confirm(`حذف العضوة "${userName}" تماماً؟`)) {
             delete allUsers[userName];
             await saveUsersToCloud();
             renderAdminTable();
