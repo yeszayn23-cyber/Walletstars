@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-color: #f7f4ed;
-            --card-bg: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.92);
             --primary-brown: #4a3327;
             --light-brown: #8c6d59;
             --accent-beige: #e6dfd5;
@@ -16,12 +16,16 @@
             --text-color: #332219;
             --danger-color: #b73232;
             --star-gold: #d4a373;
-            --shadow: 0 10px 30px rgba(74, 51, 39, 0.06);
+            --shadow: 0 10px 30px rgba(74, 51, 39, 0.08);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -38,18 +42,13 @@
 
         .card {
             background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
             border-radius: 24px;
             padding: 30px 22px;
             margin-bottom: 20px;
             box-shadow: var(--shadow);
             text-align: center;
             border: 1px solid var(--soft-border);
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .app-title {
@@ -66,15 +65,15 @@
             margin-bottom: 25px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="file"] {
             width: 90%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: 14px;
             border: 2px solid var(--accent-beige);
-            background-color: #faf8f5;
+            background-color: rgba(250, 248, 245, 0.9);
             color: var(--text-color);
-            font-size: 16px;
-            margin-bottom: 15px;
+            font-size: 15px;
+            margin-bottom: 12px;
             text-align: center;
             outline: none;
             transition: all 0.3s;
@@ -97,6 +96,7 @@
             font-weight: 600;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(74, 51, 39, 0.15);
+            margin-top: 10px;
         }
 
         button:active {
@@ -120,14 +120,12 @@
             background-color: var(--accent-beige);
             color: var(--primary-brown);
             box-shadow: none;
-            margin-top: 10px;
         }
 
         .btn-secondary:hover {
             background-color: #d4cbc0;
         }
 
-        /* تنسيق شبكة المحافظ */
         .wallet-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -136,7 +134,7 @@
         }
 
         .wallet-box {
-            background: linear-gradient(145deg, #faf8f5, #f3efe6);
+            background: linear-gradient(145deg, rgba(250, 248, 245, 0.9), rgba(243, 239, 230, 0.9));
             padding: 22px 12px;
             border-radius: 18px;
             border: 1px solid var(--soft-border);
@@ -164,8 +162,18 @@
             color: var(--primary-brown);
         }
 
-        .hidden {
-            display: none !important;
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .counter-display {
@@ -181,7 +189,7 @@
             margin: 20px 0;
             min-height: 45px;
             padding: 10px;
-            background-color: #faf8f5;
+            background-color: rgba(250, 248, 245, 0.8);
             border-radius: 12px;
             border: 1px dashed var(--soft-border);
             word-break: break-all;
@@ -191,7 +199,6 @@
             flex-wrap: wrap;
         }
 
-        /* جدول لوحة التحكم */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -204,7 +211,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.9);
             text-align: center;
         }
 
@@ -235,6 +242,7 @@
             border-radius: 8px;
             width: auto;
             box-shadow: none;
+            margin-top: 0;
         }
 
         .welcome-badge {
@@ -247,6 +255,12 @@
             margin-bottom: 20px;
             font-weight: 600;
         }
+
+        .bg-settings-box {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--soft-border);
+        }
     </style>
 </head>
 <body>
@@ -254,7 +268,7 @@
 <div class="container">
 
     <!-- شاشة تسجيل الاسم -->
-    <div id="login-screen" class="card">
+    <div id="login-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="app-subtitle">نظام المتابعة والتنظيم السحابي</div>
         <input type="text" id="username-input" placeholder="اكتبي اسمكِ هنا...">
@@ -262,28 +276,34 @@
     </div>
 
     <!-- الشاشة الرئيسية للمستخدمة -->
-    <div id="main-screen" class="card hidden">
+    <div id="main-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="welcome-badge" id="welcome-user">أهلاً بكِ، <span></span></div>
         
         <div class="wallet-grid">
-            <div class="wallet-box" onclick="openWallet('stars')">
+            <div class="wallet-box" onclick="switchScreen('stars-wallet')">
                 <h3>⭐ النجوم</h3>
                 <p id="preview-stars">0</p>
             </div>
-            <div class="wallet-box" onclick="openWallet('bans')">
+            <div class="wallet-box" onclick="switchScreen('bans-wallet')">
                 <h3>🔴 الإقصاءات</h3>
                 <p id="preview-bans">0</p>
             </div>
         </div>
 
+        <!-- إعدادات الخلفية الشخصية -->
+        <div class="bg-settings-box">
+            <input type="file" id="bg-file-input" accept="image/*" onchange="previewAndSaveBg(event)">
+            <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية الحالية</button>
+        </div>
+
         <div id="admin-panel-btn-container" class="hidden">
-            <button style="margin-top: 20px;" onclick="openAdminPanel()">لوحة تحكم المالكة 👑</button>
+            <button style="background-color: var(--primary-brown);" onclick="switchScreen('admin-panel')">لوحة تحكم المالكة 👑</button>
         </div>
     </div>
 
     <!-- محفظة النجوم -->
-    <div id="stars-wallet" class="card hidden">
+    <div id="stars-wallet" class="screen card">
         <h2>⭐ محفظة النجوم</h2>
         <div class="counter-display" id="stars-count">0</div>
         <div class="symbols-container" id="stars-symbols"></div>
@@ -291,11 +311,11 @@
             <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
             <button class="btn-danger" onclick="modifyStars(-1)">حذف</button>
         </div>
-        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
+        <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
     <!-- محفظة الإقصاءات -->
-    <div id="bans-wallet" class="card hidden">
+    <div id="bans-wallet" class="screen card">
         <h2>🔴 محفظة الإقصاءات</h2>
         <div class="counter-display" id="bans-count">0</div>
         <div class="symbols-container" id="symbols-container-bans"></div>
@@ -303,11 +323,11 @@
             <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
             <button class="btn-secondary" onclick="modifyBans(-1)" style="margin-top:0;">حذف</button>
         </div>
-        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
+        <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
     <!-- لوحة تحكم المالكة -->
-    <div id="admin-panel" class="card hidden">
+    <div id="admin-panel" class="screen card">
         <h2>👑 لوحة التحكم</h2>
         <div class="app-subtitle">متابعة العضوات والتحكم الشامل</div>
         <div class="table-responsive">
@@ -325,7 +345,7 @@
                 </tbody>
             </table>
         </div>
-        <button class="btn-secondary" onclick="goBack()">الرجوع للرئيسية</button>
+        <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
 </div>
@@ -339,6 +359,7 @@
     let currentTelegramId = "";
     let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
     let allUsers = {};
+    let globalBgImage = "";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
@@ -362,27 +383,48 @@
             }
         }
 
-        const usersRef = ref(db, 'users');
-        onValue(usersRef, (snapshot) => {
-            const data = snapshot.val();
-            allUsers = data ? data : {};
+        // تطبيق الخلفية المخزنة محلياً مؤقتاً لسرعة التحميل
+        const localBg = localStorage.getItem('wallet_custom_bg');
+        if (localBg) applyBg(localBg);
+
+        // الاستماع لقاعدة البيانات بشكل شامل
+        const dbRef = ref(db);
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            allUsers = data.users || {};
+            
+            if (data.globalBackground) {
+                globalBgImage = data.globalBackground;
+                applyBg(globalBgImage);
+            }
 
             if (currentUserName && allUsers[currentUserName]) {
                 setupUserSession(currentUserName, false);
             } else if (currentUserName) {
                 allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-                saveUsersToCloud();
+                saveDataToCloud();
                 setupUserSession(currentUserName, false);
             }
         });
     };
 
-    async function saveUsersToCloud() {
+    async function saveDataToCloud() {
         try {
             await set(ref(db, 'users'), allUsers);
         } catch (e) {
             console.error("خطأ في الحفظ:", e);
         }
+    }
+
+    // التنقل بين الشاشات لمنع التداخل نهائياً
+    window.switchScreen = function(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        
+        if (screenId === 'stars-wallet') updateStarsUI();
+        if (screenId === 'bans-wallet') updateBansUI();
+        if (screenId === 'admin-panel') renderAdminTable();
+        if (screenId === 'main-screen') updatePreviews();
     }
 
     window.registerUser = async function() {
@@ -397,7 +439,7 @@
         if (!allUsers[currentUserName]) {
             allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
         }
-        await saveUsersToCloud();
+        await saveDataToCloud();
         setupUserSession(currentUserName, true);
     }
 
@@ -407,8 +449,8 @@
         if (!currentUser) return;
 
         if (hideLogin || localStorage.getItem('wallet_current_user_name')) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-screen').classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('main-screen').classList.add('active');
         }
 
         document.querySelector('#welcome-user span').innerText = currentUser.name;
@@ -418,20 +460,6 @@
         }
 
         updatePreviews();
-        if (!document.getElementById('admin-panel').classList.contains('hidden')) {
-            renderAdminTable();
-        }
-    }
-
-    window.openWallet = function(type) {
-        document.getElementById('main-screen').classList.add('hidden');
-        if (type === 'stars') {
-            document.getElementById('stars-wallet').classList.remove('hidden');
-            updateStarsUI();
-        } else {
-            document.getElementById('bans-wallet').classList.remove('hidden');
-            updateBansUI();
-        }
     }
 
     window.modifyStars = async function(amount) {
@@ -443,7 +471,7 @@
         
         updateStarsUI();
         updatePreviews();
-        await saveUsersToCloud();
+        await saveDataToCloud();
     }
 
     window.modifyBans = async function(amount) {
@@ -455,7 +483,7 @@
         
         updateBansUI();
         updatePreviews();
-        await saveUsersToCloud();
+        await saveDataToCloud();
     }
 
     function updateStarsUI() {
@@ -479,17 +507,8 @@
         document.getElementById('preview-bans').innerText = u.bans;
     }
 
-    window.goBack = function() {
-        document.getElementById('stars-wallet').classList.add('hidden');
-        document.getElementById('bans-wallet').classList.add('hidden');
-        document.getElementById('admin-panel').classList.add('hidden');
-        document.getElementById('main-screen').classList.remove('hidden');
-        updatePreviews();
-    }
-
     window.openAdminPanel = function() {
-        document.getElementById('main-screen').classList.add('hidden');
-        document.getElementById('admin-panel').classList.remove('hidden');
+        switchScreen('admin-panel');
         renderAdminTable();
     }
 
@@ -524,7 +543,7 @@
             if(allUsers[userName]) {
                 allUsers[userName].stars = 0;
                 allUsers[userName].bans = 0;
-                await saveUsersToCloud();
+                await saveDataToCloud();
                 renderAdminTable();
                 updatePreviews();
             }
@@ -534,7 +553,7 @@
     window.deleteUser = async function(userName) {
         if (confirm(`حذف العضوة "${userName}" تماماً؟`)) {
             delete allUsers[userName];
-            await saveUsersToCloud();
+            await saveDataToCloud();
             renderAdminTable();
             
             if (currentUserName === userName) {
@@ -542,6 +561,52 @@
                 location.reload();
             }
         }
+    }
+
+    // دوال إدارة الخلفية (رفع، تعيين للجميع، أو حذف)
+    window.previewAndSaveBg = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64Image = e.target.result;
+            
+            // سؤال المالكة أو المستخدمة: هل ترغبين بتطبيق الخلفية للجميع عبر السحابة أم على جهازك فقط؟
+            const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لجهازك فقط)");
+
+            if (applyToAll && currentTelegramId === ADMIN_ID) {
+                try {
+                    await set(ref(db, 'globalBackground'), base64Image);
+                    alert("تم تحديث الخلفية لجميع العضوات بنجاح!");
+                } catch(err) {
+                    alert("حدث خطأ أثناء رفع الخلفية للسحابة (قد تكون حجم الصورة كبير جداً).");
+                }
+            } else {
+                localStorage.setItem('wallet_custom_bg', base64Image);
+                applyBg(base64Image);
+                alert("تم تعيين الخلفية على جهازك بنجاح!");
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    window.removeBackground = async function() {
+        if (confirm("هل تريدين إزالة الخلفية والعودة للشكل الافتراضي؟")) {
+            localStorage.removeItem('wallet_custom_bg');
+            document.body.style.backgroundImage = "none";
+            
+            if (currentTelegramId === ADMIN_ID) {
+                try {
+                    await set(ref(db, 'globalBackground'), null);
+                } catch(e) {}
+            }
+            alert("تم إزالة الخلفية بنجاح.");
+        }
+    }
+
+    function applyBg(imgUrl) {
+        document.body.style.backgroundImage = `url('${imgUrl}')`;
     }
 </script>
 
