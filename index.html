@@ -168,7 +168,7 @@
 <div class="container">
 
     <!-- شاشة تسجيل الاسم -->
-    <div id="login-screen" class="card hidden">
+    <div id="login-screen" class="card">
         <div class="app-title">المحفظة</div>
         <p style="color: var(--light-brown);">مرحباً بكِ في بوت المحفظة المصغر</p>
         <p>الرجاء إدخال اسمكِ للمتابعة:</p>
@@ -234,7 +234,7 @@
                 </tr>
             </thead>
             <tbody id="users-table-body">
-                <tr><td colspan="4">جاري تحميل البيانات...</td></tr>
+                <tr><td colspan="4">جاري تحميل البيانات من السحابة...</td></tr>
             </tbody>
         </table>
         <br>
@@ -243,18 +243,16 @@
 
 </div>
 
-<!-- سكربت Firebase والربط المباشر -->
+<!-- سكربت Firebase المتصل بالسحابة بشكل مباشر ودائم -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const ADMIN_ID = "8421694319";
     let currentTelegramId = "";
-    let currentUserName = "";
-    let currentUser = null;
-    let allUsers = {}; // سنخزنها ككائنات مرتبطة بالأسماء أو المفاتيح في فايربيس
+    let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
+    let allUsers = {};
 
-    // إعدادات Firebase الخاصة بكِ
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
         authDomain: "mywallet-11d29.firebaseapp.com",
@@ -277,37 +275,28 @@
             }
         }
 
-        // الاستماع للتغييرات لحظياً من قاعدة بيانات فايربيس
+        // الربط المباشر بقاعدة البيانات وجلب البيانات فوراً وتحديثها لحظياً
         const usersRef = ref(db, 'users');
         onValue(usersRef, (snapshot) => {
             const data = snapshot.val();
             allUsers = data ? data : {};
 
-            let savedName = localStorage.getItem('wallet_current_user_name');
-            if (savedName && allUsers[savedName]) {
-                currentUser = allUsers[savedName];
-                currentUserName = savedName;
-                updatePreviews();
-                if (document.getElementById('admin-panel').classList.contains('hidden') === false) {
-                    renderAdminTable();
-                }
+            if (currentUserName && allUsers[currentUserName]) {
+                setupUserSession(currentUserName, false);
+            } else if (currentUserName) {
+                // إذا كان الاسم مخزناً محلياً وغير موجود بالسحابة، يتم إضافته تلقائياً
+                allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+                saveUsersToCloud();
+                setupUserSession(currentUserName, false);
             }
         });
-
-        let savedName = localStorage.getItem('wallet_current_user_name');
-        if (!savedName) {
-            document.getElementById('login-screen').classList.remove('hidden');
-        } else {
-            setupUserSession(savedName);
-        }
     };
 
-    // حفظ أو تحديث بيانات المستخدمين في فايربيس
     async function saveUsersToCloud() {
         try {
             await set(ref(db, 'users'), allUsers);
         } catch (e) {
-            console.log("خطأ في التزامن مع السحابة", e);
+            console.error("خطأ في الحفظ السحابي:", e);
         }
     }
 
@@ -317,28 +306,39 @@
             alert("الرجاء إدخال الاسم!");
             return;
         }
-        localStorage.setItem('wallet_current_user_name', inputName);
-        setupUserSession(inputName);
-    }
+        currentUserName = inputName;
+        localStorage.setItem('wallet_current_user_name', currentUserName);
 
-    async function setupUserSession(name) {
-        currentUserName = name;
-        
         if (!allUsers[currentUserName]) {
             allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
             await saveUsersToCloud();
         }
-        currentUser = allUsers[currentUserName];
+        setupUserSession(currentUserName, true);
+    }
 
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-screen').classList.remove('hidden');
+    function setupUserSession(name, hideLogin) {
+        currentUserName = name;
+        let currentUser = allUsers[currentUserName];
+        if (!currentUser) return;
+
+        if (hideLogin) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+        } else if (localStorage.getItem('wallet_current_user_name')) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+        }
+
         document.querySelector('#welcome-user span').innerText = currentUser.name;
-
+        
         if (currentTelegramId === ADMIN_ID) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
         }
 
         updatePreviews();
+        if (!document.getElementById('admin-panel').classList.contains('hidden')) {
+            renderAdminTable();
+        }
     }
 
     window.openWallet = function(type) {
@@ -353,45 +353,44 @@
     }
 
     window.modifyStars = async function(amount) {
-        if (!currentUser) return;
-        currentUser.stars += amount;
-        if (currentUser.stars < 0) currentUser.stars = 0;
-        allUsers[currentUser.name] = currentUser;
+        if (!allUsers[currentUserName]) return;
+        allUsers[currentUserName].stars += amount;
+        if (allUsers[currentUserName].stars < 0) allUsers[currentUserName].stars = 0;
+        
         updateStarsUI();
         updatePreviews();
         await saveUsersToCloud();
     }
 
     window.modifyBans = async function(amount) {
-        if (!currentUser) return;
-        currentUser.bans += amount;
-        if (currentUser.bans < 0) currentUser.bans = 0;
-        allUsers[currentUser.name] = currentUser;
+        if (!allUsers[currentUserName]) return;
+        allUsers[currentUserName].bans += amount;
+        if (allUsers[currentUserName].bans < 0) allUsers[currentUserName].bans = 0;
+        
         updateBansUI();
         updatePreviews();
         await saveUsersToCloud();
     }
 
     function updateStarsUI() {
-        if(!currentUser) return;
-        document.getElementById('stars-count').innerText = currentUser.stars;
-        document.getElementById('stars-symbols').innerText = "⭐".repeat(currentUser.stars);
+        let u = allUsers[currentUserName];
+        if(!u) return;
+        document.getElementById('stars-count').innerText = u.stars;
+        document.getElementById('stars-symbols').innerText = "⭐".repeat(u.stars);
     }
 
     function updateBansUI() {
-        if(!currentUser) return;
-        document.getElementById('bans-count').innerText = currentUser.bans;
-        document.getElementById('symbols-container-bans').innerText = "🔴".repeat(currentUser.bans);
+        let u = allUsers[currentUserName];
+        if(!u) return;
+        document.getElementById('bans-count').innerText = u.bans;
+        document.getElementById('symbols-container-bans').innerText = "🔴".repeat(u.bans);
     }
 
     function updatePreviews() {
-        if(!currentUser) return;
-        let activeUser = allUsers[currentUserName];
-        if(activeUser) {
-            currentUser = activeUser;
-            document.getElementById('preview-stars').innerText = currentUser.stars;
-            document.getElementById('preview-bans').innerText = currentUser.bans;
-        }
+        let u = allUsers[currentUserName];
+        if(!u) return;
+        document.getElementById('preview-stars').innerText = u.stars;
+        document.getElementById('preview-bans').innerText = u.bans;
     }
 
     window.goBack = function() {
@@ -452,7 +451,7 @@
             await saveUsersToCloud();
             renderAdminTable();
             
-            if (currentUser && currentUser.name === userName) {
+            if (currentUserName === userName) {
                 localStorage.removeItem('wallet_current_user_name');
                 location.reload();
             }
