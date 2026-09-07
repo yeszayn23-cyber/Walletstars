@@ -15,6 +15,7 @@
             --soft-border: #dcd4c5;
             --text-color: #332219;
             --danger-color: #b73232;
+            --success-color: #2e7d32;
             --star-gold: #d4a373;
             --shadow: 0 10px 30px rgba(74, 51, 39, 0.08);
         }
@@ -37,7 +38,7 @@
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
         }
 
         .card {
@@ -116,6 +117,15 @@
             background-color: #992828;
         }
 
+        .btn-success {
+            background-color: var(--success-color);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+        }
+
+        .btn-success:hover {
+            background-color: #1b5e20;
+        }
+
         .btn-secondary {
             background-color: var(--accent-beige);
             color: var(--primary-brown);
@@ -129,13 +139,13 @@
         .wallet-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .wallet-box {
             background: linear-gradient(145deg, rgba(250, 248, 245, 0.9), rgba(243, 239, 230, 0.9));
-            padding: 22px 12px;
+            padding: 18px 10px;
             border-radius: 18px;
             border: 1px solid var(--soft-border);
             cursor: pointer;
@@ -150,16 +160,21 @@
         }
 
         .wallet-box h3 {
-            margin: 0 0 8px 0;
-            font-size: 16px;
+            margin: 0 0 6px 0;
+            font-size: 15px;
             color: var(--primary-brown);
         }
 
         .wallet-box p {
             margin: 0;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--primary-brown);
+        }
+
+        .full-width-box {
+            grid-column: span 2;
+            background: linear-gradient(145deg, rgba(250, 248, 245, 0.95), rgba(235, 227, 215, 0.95));
         }
 
         .screen {
@@ -293,6 +308,10 @@
                 <h3>🔴 الإقصاءات</h3>
                 <p id="preview-bans">0</p>
             </div>
+            <div class="wallet-box full-width-box" onclick="switchScreen('tasks-view-screen')">
+                <h3>📋 النقاط العملية</h3>
+                <p id="preview-tasks" style="font-size: 15px; color: var(--light-brown); margin-top: 4px;">اضعطي لعرض التفاصيل</p>
+            </div>
         </div>
 
         <!-- إعدادات الخلفية الشخصية -->
@@ -330,10 +349,38 @@
         <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
+    <!-- شاشة النقاط العملية (خاصة بالعضوات للاطلاع على حالة التنفيذ) -->
+    <div id="tasks-view-screen" class="screen card">
+        <h2>📋 نقاطك العملية</h2>
+        <div class="app-subtitle">متابعة حالة التنفيذ الخاصة بكِ</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>النقطة / المهمة</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody id="user-tasks-tbody">
+                    <tr><td colspan="2" style="color: var(--light-brown);">جاري التحميل...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="switchScreen('main-screen')" style="margin-top: 15px;">الرجوع للرئيسية</button>
+    </div>
+
     <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="screen card">
         <h2>👑 لوحة التحكم</h2>
-        <div class="app-subtitle">متابعة العضوات والتحكم الشامل</div>
+        <div class="app-subtitle">متابعة العضوات وإدارة النقاط العملية</div>
+        
+        <div style="background: rgba(250,248,245,0.8); padding: 12px; border-radius: 14px; margin-bottom: 15px; border: 1px solid var(--soft-border);">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; color: var(--primary-brown);">إضافة نقطة عملية جديدة للعضوات</h3>
+            <input type="text" id="new-task-title" placeholder="اكتبي عنوان النقطة العملية..." style="margin-bottom: 8px; width: 100%;">
+            <button onclick="addNewGlobalTask()" style="margin-top: 0; padding: 10px;">إضافة النقطة</button>
+        </div>
+
+        <h3 style="font-size: 15px; color: var(--primary-brown); margin: 15px 0 8px 0; text-align: right;">قائمة العضوات</h3>
         <div class="table-responsive">
             <table>
                 <thead>
@@ -349,21 +396,44 @@
                 </tbody>
             </table>
         </div>
-        <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
+        <button class="btn-secondary" onclick="switchScreen('main-screen')" style="margin-top: 15px;">الرجوع للرئيسية</button>
+    </div>
+
+    <!-- لوحة إدارة مهام العضوة المحددة (للمالكة) -->
+    <div id="admin-user-tasks-panel" class="screen card">
+        <h2 id="managing-user-title">إدارة نقاط: <span></span></h2>
+        <div class="app-subtitle">تعديل حالة التنفيذ (تم / لم يتم)</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>النقطة العملية</th>
+                        <th>الحالة</th>
+                        <th>تحكم</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-tasks-tbody">
+                    <tr><td colspan="3" style="color: var(--light-brown);">لا توجد نقاط مضافة</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="switchScreen('admin-panel')" style="margin-top: 15px;">الرجوع للوحة التحكم</button>
     </div>
 
 </div>
 
-<!-- سكربت Firebase والمنطق البرمجي المستقل -->
+<!-- سكربت Firebase والمنطق البرمجي -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get, update, remove, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const ADMIN_ID = "8421694319";
     let currentTelegramId = "";
     let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
     let allUsers = {};
-    let currentUserData = { stars: 0, bans: 0, background: "" };
+    let globalTasks = {};
+    let currentUserData = { stars: 0, bans: 0, background: "", tasks: {} };
+    let selectedUserForTasks = "";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
@@ -387,15 +457,25 @@
             }
         }
 
-        // الاستماع لقائمة جميع المستخدمين للوحة التحكم
+        // الاستماع لقائمة المهام العامة
+        onValue(ref(db, 'globalTasks'), (snapshot) => {
+            globalTasks = snapshot.val() || {};
+            if (currentUserName) {
+                renderUserTasksView();
+            }
+        });
+
+        // الاستماع لقائمة المستخدمين
         onValue(ref(db, 'users'), (snapshot) => {
             allUsers = snapshot.val() || {};
             if (document.getElementById('admin-panel').classList.contains('active')) {
                 renderAdminTable();
             }
+            if (selectedUserForTasks && document.getElementById('admin-user-tasks-panel').classList.contains('active')) {
+                renderAdminUserTasksTable();
+            }
         });
 
-        // إذا كان هناك اسم مسجل مسبقاً، فتح جلسته السحابية الخاصة
         if (currentUserName) {
             loadUserSession(currentUserName, false);
         }
@@ -408,8 +488,9 @@
         onValue(userRef, (snapshot) => {
             if (snapshot.exists()) {
                 currentUserData = snapshot.val();
+                if (!currentUserData.tasks) currentUserData.tasks = {};
             } else {
-                currentUserData = { stars: 0, bans: 0, background: "" };
+                currentUserData = { stars: 0, bans: 0, background: "", tasks: {} };
                 set(userRef, currentUserData);
             }
 
@@ -433,6 +514,7 @@
             }
 
             updatePreviews();
+            renderUserTasksView();
         });
     }
 
@@ -449,7 +531,7 @@
         const snapshot = await get(userRef);
         
         if (!snapshot.exists()) {
-            await set(userRef, { stars: 0, bans: 0, background: "" });
+            await set(userRef, { stars: 0, bans: 0, background: "", tasks: {} });
         }
 
         loadUserSession(currentUserName, true);
@@ -462,13 +544,13 @@
         if (screenId === 'stars-wallet') updateStarsUI();
         if (screenId === 'bans-wallet') updateBansUI();
         if (screenId === 'admin-panel') renderAdminTable();
+        if (screenId === 'tasks-view-screen') renderUserTasksView();
         if (screenId === 'main-screen') updatePreviews();
     }
 
     window.modifyStars = async function(amount) {
         currentUserData.stars += amount;
         if (currentUserData.stars < 0) currentUserData.stars = 0;
-        
         updateStarsUI();
         updatePreviews();
         await update(ref(db, 'users/' + currentUserName), { stars: currentUserData.stars });
@@ -477,7 +559,6 @@
     window.modifyBans = async function(amount) {
         currentUserData.bans += amount;
         if (currentUserData.bans < 0) currentUserData.bans = 0;
-        
         updateBansUI();
         updatePreviews();
         await update(ref(db, 'users/' + currentUserName), { bans: currentUserData.bans });
@@ -496,8 +577,46 @@
     function updatePreviews() {
         document.getElementById('preview-stars').innerText = currentUserData.stars;
         document.getElementById('preview-bans').innerText = currentUserData.bans;
+        
+        let taskKeys = Object.keys(globalTasks);
+        if(taskKeys.length === 0) {
+            document.getElementById('preview-tasks').innerText = "لا توجد نقاط عملية حالياً";
+        } else {
+            let completedCount = 0;
+            taskKeys.forEach(id => {
+                if(currentUserData.tasks && currentUserData.tasks[id] === true) completedCount++;
+            });
+            document.getElementById('preview-tasks').innerText = `${completedCount} / ${taskKeys.length} تم التنفيذ`;
+        }
     }
 
+    // عرض النقاط العملية الخاصة بالعضوة (شاهدة فقط لحالتها)
+    function renderUserTasksView() {
+        const tbody = document.getElementById('user-tasks-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const taskIds = Object.keys(globalTasks);
+        if (taskIds.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="2" style="color: var(--light-brown);">لا توجد نقاط عملية مسجلة حالياً</td></tr>`;
+            return;
+        }
+
+        taskIds.forEach(id => {
+            const taskText = globalTasks[id];
+            const isDone = currentUserData.tasks && currentUserData.tasks[id] === true;
+            const statusIcon = isDone ? "✅ تم التنفيذ" : "❌ لم يتم";
+            const statusColor = isDone ? "color: var(--success-color); font-weight: bold;" : "color: var(--danger-color); font-weight: bold;";
+
+            tbody.innerHTML += `<tr>
+                <td style="text-align: right; padding-right: 12px;">${taskText}</td>
+                <td style="${statusColor}">${statusIcon}</td>
+            </tr>`;
+        });
+        updatePreviews();
+    }
+
+    // إدارة لوحة التحكم (المالكة)
     function renderAdminTable() {
         const tbody = document.getElementById('users-table-body');
         if (!tbody) return;
@@ -517,12 +636,70 @@
                 <td>🔴 ${user.bans || 0}</td>
                 <td>
                     <div class="action-btns">
+                        <button class="btn-secondary mini-btn" onclick="openAdminUserTasks('${userName}')" title="النقاط العملية">📋</button>
                         <button class="btn-secondary mini-btn" onclick="resetUser('${userName}')" title="تصفير">🔄</button>
                         <button class="btn-danger mini-btn" onclick="deleteUser('${userName}')" title="حذف">❌</button>
                     </div>
                 </td>
             </tr>`;
         });
+    }
+
+    window.addNewGlobalTask = async function() {
+        const input = document.getElementById('new-task-title');
+        const text = input.value.trim();
+        if(!text) {
+            alert("يرجى كتابة عنوان النقطة العملية!");
+            return;
+        }
+        await push(ref(db, 'globalTasks'), text);
+        input.value = "";
+        alert("تمت إضافة النقطة العملية بنجاح لجميع العضوات!");
+    }
+
+    window.openAdminUserTasks = function(userName) {
+        selectedUserForTasks = userName;
+        document.querySelector('#admin-user-tasks-panel span').innerText = userName;
+        renderAdminUserTasksTable();
+        switchScreen('admin-user-tasks-panel');
+    }
+
+    function renderAdminUserTasksTable() {
+        const tbody = document.getElementById('admin-user-tasks-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const taskIds = Object.keys(globalTasks);
+        if (taskIds.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="color: var(--light-brown);">لا توجد نقاط عملية عامة مسجلة</td></tr>`;
+            return;
+        }
+
+        const targetUser = allUsers[selectedUserForTasks] || { tasks: {} };
+        const userTasks = targetUser.tasks || {};
+
+        taskIds.forEach(id => {
+            const taskText = globalTasks[id];
+            const isDone = userTasks[id] === true;
+            const toggleText = isDone ? "إلغاء التنفيذ ❌" : "تحديد تم ✅";
+            const btnClass = isDone ? "btn-danger mini-btn" : "btn-success mini-btn";
+
+            tbody.innerHTML += `<tr>
+                <td style="text-align: right; padding-right: 10px;">${taskText}</td>
+                <td>${isDone ? "✅ تم" : "❌ لم يتم"}</td>
+                <td>
+                    <button class="${btnClass}" onclick="toggleUserTaskStatus('${id}', ${!isDone})">${toggleText}</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    window.toggleUserTaskStatus = async function(taskId, newStatus) {
+        await update(ref(db, `users/${selectedUserForTasks}/tasks`), { [taskId]: newStatus });
+        // تحديث محلي سريع
+        if(!allUsers[selectedUserForTasks].tasks) allUsers[selectedUserForTasks].tasks = {};
+        allUsers[selectedUserForTasks].tasks[taskId] = newStatus;
+        renderAdminUserTasksTable();
     }
 
     window.resetUser = async function(userName) {
