@@ -354,7 +354,7 @@
 
 </div>
 
-<!-- سكربت Firebase والمنطق البرمجي المربوط بالرابط السحابي -->
+<!-- سكربت Firebase والمنطق البرمجي المستقل -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -387,7 +387,7 @@
             }
         }
 
-        // الاستماع لقائمة جميع المستخدمين (لأجل لوحة التحكم)
+        // الاستماع لقائمة جميع المستخدمين للوحة التحكم
         onValue(ref(db, 'users'), (snapshot) => {
             allUsers = snapshot.val() || {};
             if (document.getElementById('admin-panel').classList.contains('active')) {
@@ -395,13 +395,12 @@
             }
         });
 
-        // إذا كان هناك اسم مسجل مسبقاً، يتم فتح جلسته السحابية الخاصة به
+        // إذا كان هناك اسم مسجل مسبقاً، فتح جلسته السحابية الخاصة
         if (currentUserName) {
             loadUserSession(currentUserName, false);
         }
     };
 
-    // تحميل وتتبع بيانات المستخدمة الحالية فقط بشكل مستقل
     function loadUserSession(name, hideLogin) {
         currentUserName = name;
         const userRef = ref(db, 'users/' + currentUserName);
@@ -410,12 +409,10 @@
             if (snapshot.exists()) {
                 currentUserData = snapshot.val();
             } else {
-                // إذا لم تكن موجودة، نقوم بإنشائها أول مرة
                 currentUserData = { stars: 0, bans: 0, background: "" };
                 set(userRef, currentUserData);
             }
 
-            // تطبيق الخلفية الخاصة بهذه المستخدمة وحدها إن وجدت
             if (currentUserData.background) {
                 applyBg(currentUserData.background);
             } else {
@@ -429,7 +426,6 @@
 
             document.querySelector('#welcome-user span').innerText = currentUserName;
 
-            // إظهار لوحة التحكم حصرياً للمالكة
             if (currentTelegramId === ADMIN_ID) {
                 document.getElementById('admin-panel-btn-container').classList.remove('hidden');
             } else {
