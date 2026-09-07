@@ -9,8 +9,6 @@
         :root {
             --primary-brown: #4a3327;
             --light-brown: #8c6d59;
-            --accent-beige: rgba(230, 223, 213, 0.5);
-            --soft-border: rgba(220, 212, 197, 0.4);
             --text-color: #332219;
             --danger-color: #b73232;
         }
@@ -36,7 +34,6 @@
             max-width: 420px;
         }
 
-        /* بطاقات شفافة بالكامل لتظهر الخلفية */
         .card {
             background-color: rgba(255, 255, 255, 0.35);
             backdrop-filter: blur(10px);
@@ -68,7 +65,7 @@
             width: 90%;
             padding: 12px 16px;
             border-radius: 14px;
-            border: 2px solid var(--soft-border);
+            border: 2px solid rgba(220, 212, 197, 0.4);
             background-color: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(5px);
             color: var(--text-color);
@@ -131,7 +128,6 @@
             margin-top: 20px;
         }
 
-        /* مربعات المحافظ شفافة تماماً */
         .wallet-box {
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(6px);
@@ -272,15 +268,15 @@
 
 <div class="container">
 
-    <!-- شاشة تسجيل الاسم للعضوات الجدد -->
+    <!-- شاشة تسجيل الاسم (تظهر فقط لأي عضوة جديدة لأول مرة) -->
     <div id="login-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="app-subtitle">أدخلي اسمكِ لمرة واحدة فقط للمتابعة</div>
         <input type="text" id="username-input" placeholder="اسمكِ هنا...">
-        <button onclick="registerUser()">دخول سريع</button>
+        <button onclick="registerUser()">دخول للمحفظة</button>
     </div>
 
-    <!-- الشاشة الرئيسية -->
+    <!-- الشاشة الرئيسية للمستخدمة -->
     <div id="main-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="welcome-badge" id="welcome-user">أهلاً بكِ، <span></span></div>
@@ -296,13 +292,13 @@
             </div>
         </div>
 
-        <!-- إعدادات الخلفية -->
-        <div class="bg-settings-box">
+        <!-- إعدادات الخلفية تظهر للمالكة وحدها -->
+        <div id="admin-bg-box" class="bg-settings-box hidden">
             <input type="file" id="bg-file-input" accept="image/*" onchange="previewAndSaveBg(event)">
             <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية</button>
         </div>
 
-        <!-- لوحة التحكم تظهر لك وحدك حصراً -->
+        <!-- لوحة تحكم المالكة تظهر لك وحدك حصراً -->
         <div id="admin-panel-btn-container" class="hidden">
             <button style="background-color: var(--primary-brown);" onclick="switchScreen('admin-panel')">لوحة تحكم المالكة 👑</button>
         </div>
@@ -313,10 +309,6 @@
         <h2>⭐ محفظة النجوم</h2>
         <div class="counter-display" id="stars-count">0</div>
         <div class="symbols-container" id="stars-symbols"></div>
-        <div id="stars-actions" style="display: flex; gap: 10px;" class="hidden">
-            <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
-            <button class="btn-danger" onclick="modifyStars(-1)">حذف</button>
-        </div>
         <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
@@ -325,14 +317,10 @@
         <h2>🔴 محفظة الإقصاءات</h2>
         <div class="counter-display" id="bans-count">0</div>
         <div class="symbols-container" id="symbols-container-bans"></div>
-        <div id="bans-actions" style="display: flex; gap: 10px;" class="hidden">
-            <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
-            <button class="btn-secondary" onclick="modifyBans(-1)" style="margin-top:0;">حذف</button>
-        </div>
         <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
-    <!-- لوحة تحكم المالكة -->
+    <!-- لوحة تحكم المالكة الشاملة -->
     <div id="admin-panel" class="screen card">
         <h2>👑 لوحة التحكم</h2>
         <div class="app-subtitle">متابعة العضوات والتحكم الشامل</div>
@@ -392,7 +380,7 @@
             }
         }
 
-        // التحقق الحصري الصارم للمالكة
+        // الفحص الدقيق للمالكة بناءً على الآيدي أو اليوزر
         if (myId === ADMIN_ID || myUsername === ADMIN_USERNAME.toLowerCase()) {
             isAdmin = true;
             currentUserName = "زينب (المالكة)";
@@ -449,15 +437,13 @@
         document.getElementById('main-screen').classList.add('active');
         document.querySelector('#welcome-user span').innerText = currentUserName;
 
-        // الصلاحيات تظهر للمالكة وحدها
+        // الصلاحيات تظهر للمالكة وحدها فقط
         if (isAdmin) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
-            document.getElementById('stars-actions').classList.remove('hidden');
-            document.getElementById('bans-actions').classList.remove('hidden');
+            document.getElementById('admin-bg-box').classList.remove('hidden');
         } else {
             document.getElementById('admin-panel-btn-container').classList.add('hidden');
-            document.getElementById('stars-actions').classList.add('hidden');
-            document.getElementById('bans-actions').classList.add('hidden');
+            document.getElementById('admin-bg-box').classList.add('hidden');
         }
         updatePreviews();
     }
@@ -470,24 +456,6 @@
         if (screenId === 'bans-wallet') updateBansUI();
         if (screenId === 'admin-panel' && isAdmin) renderAdminTable();
         if (screenId === 'main-screen') updatePreviews();
-    }
-
-    window.modifyStars = async function(amount) {
-        if (!isAdmin) return;
-        if (!allUsers[currentUserName]) allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-        allUsers[currentUserName].stars = Math.max(0, allUsers[currentUserName].stars + amount);
-        updateStarsUI();
-        updatePreviews();
-        saveDataToCloud();
-    }
-
-    window.modifyBans = async function(amount) {
-        if (!isAdmin) return;
-        if (!allUsers[currentUserName]) allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-        allUsers[currentUserName].bans = Math.max(0, allUsers[currentUserName].bans + amount);
-        updateBansUI();
-        updatePreviews();
-        saveDataToCloud();
     }
 
     function updateStarsUI() {
@@ -526,12 +494,32 @@
                 <td>🔴 ${user.bans}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="btn-secondary mini-btn" onclick="resetUser('${name}')">🔄</button>
-                        <button class="btn-danger mini-btn" onclick="deleteUser('${name}')">❌</button>
+                        <button class="btn-secondary mini-btn" onclick="addStarToUser('${name}')" title="إضافة نجمة">⭐+</button>
+                        <button class="btn-secondary mini-btn" onclick="addBanToUser('${name}')" title="إضافة إقصاء">🔴+</button>
+                        <button class="btn-secondary mini-btn" onclick="resetUser('${name}')" title="تصفير">🔄</button>
+                        <button class="btn-danger mini-btn" onclick="deleteUser('${name}')" title="حذف">❌</button>
                     </div>
                 </td>
             </tr>`;
         });
+    }
+
+    window.addStarToUser = function(name) {
+        if (!isAdmin) return;
+        if (allUsers[name]) {
+            allUsers[name].stars = (allUsers[name].stars || 0) + 1;
+            saveDataToCloud();
+            renderAdminTable();
+        }
+    }
+
+    window.addBanToUser = function(name) {
+        if (!isAdmin) return;
+        if (allUsers[name]) {
+            allUsers[name].bans = (allUsers[name].bans || 0) + 1;
+            saveDataToCloud();
+            renderAdminTable();
+        }
     }
 
     window.resetUser = function(name) {
@@ -546,7 +534,7 @@
 
     window.deleteUser = function(name) {
         if (!isAdmin) return;
-        if (confirm(`حذف ${name}؟`)) {
+        if (confirm(`حذف العضوة "${name}"؟`)) {
             delete allUsers[name];
             saveDataToCloud();
             renderAdminTable();
@@ -554,6 +542,7 @@
     }
 
     window.previewAndSaveBg = function(event) {
+        if (!isAdmin) return;
         const file = event.target.files[0];
         if (!file) return;
 
@@ -563,19 +552,18 @@
             localStorage.setItem('wallet_bg', base64);
             applyBg(base64);
             
-            if (isAdmin && confirm("تطبيق الخلفية للجميع في السحابة؟")) {
-                set(ref(db, 'globalBackground'), base64);
-            }
-            alert("تم حفظ الخلفية بنجاح!");
+            set(ref(db, 'globalBackground'), base64);
+            alert("تم حفظ وتطبيق الخلفية للجميع بنجاح!");
         };
         reader.readAsDataURL(file);
     }
 
     window.removeBackground = function() {
+        if (!isAdmin) return;
         localStorage.removeItem('wallet_bg');
         document.body.style.backgroundImage = "none";
-        if (isAdmin) set(ref(db, 'globalBackground'), null);
-        alert("تمت الإزالة.");
+        set(ref(db, 'globalBackground'), null);
+        alert("تمت إزالة الخلفية.");
     }
 
     function applyBg(url) {
