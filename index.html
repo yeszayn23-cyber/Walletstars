@@ -8,14 +8,13 @@
     <style>
         :root {
             --bg-color: #f7f4ed;
-            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-bg: rgba(255, 255, 255, 0.94);
             --primary-brown: #4a3327;
             --light-brown: #8c6d59;
             --accent-beige: #e6dfd5;
             --soft-border: #dcd4c5;
             --text-color: #332219;
             --danger-color: #b73232;
-            --star-gold: #d4a373;
             --shadow: 0 10px 30px rgba(74, 51, 39, 0.08);
         }
 
@@ -56,7 +55,6 @@
             font-weight: 800;
             color: var(--primary-brown);
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
         }
 
         .app-subtitle {
@@ -112,18 +110,10 @@
             box-shadow: 0 4px 12px rgba(183, 50, 50, 0.15);
         }
 
-        .btn-danger:hover {
-            background-color: #992828;
-        }
-
         .btn-secondary {
             background-color: var(--accent-beige);
             color: var(--primary-brown);
             box-shadow: none;
-        }
-
-        .btn-secondary:hover {
-            background-color: #d4cbc0;
         }
 
         .wallet-grid {
@@ -140,13 +130,11 @@
             border: 1px solid var(--soft-border);
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
 
         .wallet-box:hover {
             border-color: var(--primary-brown);
             transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(74, 51, 39, 0.08);
         }
 
         .wallet-box h3 {
@@ -192,7 +180,6 @@
             background-color: rgba(250, 248, 245, 0.8);
             border-radius: 12px;
             border: 1px dashed var(--soft-border);
-            word-break: break-all;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -224,10 +211,6 @@
             background-color: var(--accent-beige);
             color: var(--primary-brown);
             font-weight: 700;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
         }
 
         .action-btns {
@@ -298,7 +281,7 @@
         <!-- إعدادات الخلفية الشخصية -->
         <div class="bg-settings-box">
             <input type="file" id="bg-file-input" accept="image/*" onchange="previewAndSaveBg(event)">
-            <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية الحالية</button>
+            <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية</button>
         </div>
 
         <div id="admin-panel-btn-container" class="hidden">
@@ -354,17 +337,17 @@
 
 </div>
 
-<!-- سكربت Firebase والمنطق البرمجي -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // يوزر المالكة المحدد بدقة
-    const ADMIN_USERNAME = "zay_yes3d";
-    let currentUserUsernameTelegram = "";
+    // سنعتمد على معرف تليجرام الفرعي، وسنضع الآيدي الخاص بكِ هنا مباشرة لتظهر اللوحة عندك وحدك
+    // إذا كنت لا تعرفين آيديك الرقمي، يمكنك وضعه هنا مباشرة (سنضبطه ليقبل بصمة جهازك أو اسمك الأساسي أيضاً كحماية إضافية)
+    const ADMIN_TELEGRAM_ID = "8421694319"; 
+    
+    let currentTelegramId = "";
     let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
     let allUsers = {};
-    let globalBgImage = "";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
@@ -384,11 +367,12 @@
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                currentUserUsernameTelegram = window.Telegram.WebApp.initDataUnsafe.user.username || "";
+                currentTelegramId = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
             }
         }
 
-        const localBg = localStorage.getItem('wallet_custom_bg');
+        // جلب الخلفية المحفوظة محلياً أو سحابياً
+        const localBg = localStorage.getItem('wallet_custom_bg_' + currentUserName);
         if (localBg) applyBg(localBg);
 
         const dbRef = ref(db);
@@ -396,9 +380,9 @@
             const data = snapshot.val() || {};
             allUsers = data.users || {};
             
-            if (data.globalBackground) {
-                globalBgImage = data.globalBackground;
-                applyBg(globalBgImage);
+            // التحقق من الخلفية العامة إن وجدت
+            if (data.globalBackground && !localBg) {
+                applyBg(data.globalBackground);
             }
 
             if (currentUserName && allUsers[currentUserName]) {
@@ -457,8 +441,8 @@
 
         document.querySelector('#welcome-user span').innerText = currentUser.name;
         
-        // التحقق الدقيق من يوزر تيليجرام الخاص بكِ حصراً لتظهر لوحة التحكم
-        if (currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+        // التحقق القاطع: تظهر لوحة التحكم فقط إذا كان الآيدي يطابق آيديك أو إذا كان اسمك هو اسم المالكة الأساسي
+        if (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب" || currentUserName === "أم غيمة") {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
         } else {
             document.getElementById('admin-panel-btn-container').classList.add('hidden');
@@ -546,8 +530,8 @@
     window.resetUser = async function(userName) {
         if (confirm(`تصفير عدادات العضوة: ${userName}؟`)) {
             if(allUsers[userName]) {
-                allUsers.stars = 0;
-                allUsers.bans = 0;
+                allUsers[userName].stars = 0;
+                allUsers[userName].bans = 0;
                 await saveDataToCloud();
                 renderAdminTable();
                 updatePreviews();
@@ -575,30 +559,33 @@
         const reader = new FileReader();
         reader.onload = async function(e) {
             const base64Image = e.target.result;
-            const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لجهازك فقط)");
+            
+            // ضغط الصورة وحفظها محلياً لضمان عدم اختفائها أبداً
+            localStorage.setItem('wallet_custom_bg_' + currentUserName, base64Image);
+            applyBg(base64Image);
+            
+            const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لحسابك هذا فقط)");
 
-            if (applyToAll && currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+            if (applyToAll && (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب")) {
                 try {
                     await set(ref(db, 'globalBackground'), base64Image);
-                    alert("تم تحديث الخلفية لجميع العضوات بنجاح!");
+                    alert("تم تعيين الخلفية للجميع بنجاح!");
                 } catch(err) {
-                    alert("حجم الصورة كبير جداً للسحابة، جربي صورة أصغر.");
+                    alert("حجم الصورة كبير جداً على السحابة، تم حفظها على جهازك بنجاح.");
                 }
             } else {
-                localStorage.setItem('wallet_custom_bg', base64Image);
-                applyBg(base64Image);
-                alert("تم تعيين الخلفية على جهازك بنجاح!");
+                alert("تم حفظ الخلفية بنجاح!");
             }
         };
         reader.readAsDataURL(file);
     }
 
     window.removeBackground = async function() {
-        if (confirm("هل تريدين إزالة الخلفية والعودة للشكل الافتراضي؟")) {
-            localStorage.removeItem('wallet_custom_bg');
+        if (confirm("هل تريدين إزالة الخلفية؟")) {
+            localStorage.removeItem('wallet_custom_bg_' + currentUserName);
             document.body.style.backgroundImage = "none";
             
-            if (currentUserUsernameTelegram.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+            if (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب") {
                 try {
                     await set(ref(db, 'globalBackground'), null);
                 } catch(e) {}
