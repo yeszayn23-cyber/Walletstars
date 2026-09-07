@@ -7,15 +7,21 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
+            --bg-color: #f7f4ed;
+            --card-bg: rgba(255, 255, 255, 0.92);
             --primary-brown: #4a3327;
             --light-brown: #8c6d59;
+            --accent-beige: #e6dfd5;
+            --soft-border: #dcd4c5;
             --text-color: #332219;
             --danger-color: #b73232;
+            --star-gold: #d4a373;
+            --shadow: 0 10px 30px rgba(74, 51, 39, 0.08);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f4ed;
+            background-color: var(--bg-color);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -35,15 +41,14 @@
         }
 
         .card {
-            background-color: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
             border-radius: 24px;
             padding: 30px 22px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(74, 51, 39, 0.05);
+            box-shadow: var(--shadow);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--soft-border);
         }
 
         .app-title {
@@ -51,23 +56,21 @@
             font-weight: 800;
             color: var(--primary-brown);
             margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.6);
+            letter-spacing: -0.5px;
         }
 
         .app-subtitle {
             font-size: 14px;
             color: var(--light-brown);
             margin-bottom: 25px;
-            font-weight: 600;
         }
 
         input[type="text"], input[type="file"] {
             width: 90%;
             padding: 12px 16px;
             border-radius: 14px;
-            border: 2px solid rgba(220, 212, 197, 0.4);
-            background-color: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent-beige);
+            background-color: rgba(250, 248, 245, 0.9);
             color: var(--text-color);
             font-size: 15px;
             margin-bottom: 12px;
@@ -78,7 +81,7 @@
 
         input[type="text"]:focus {
             border-color: var(--primary-brown);
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: #fff;
         }
 
         button {
@@ -109,16 +112,18 @@
             box-shadow: 0 4px 12px rgba(183, 50, 50, 0.15);
         }
 
+        .btn-danger:hover {
+            background-color: #992828;
+        }
+
         .btn-secondary {
-            background-color: rgba(230, 223, 213, 0.7);
-            backdrop-filter: blur(5px);
+            background-color: var(--accent-beige);
             color: var(--primary-brown);
             box-shadow: none;
-            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .btn-secondary:hover {
-            background-color: rgba(212, 203, 192, 0.9);
+            background-color: #d4cbc0;
         }
 
         .wallet-grid {
@@ -129,20 +134,19 @@
         }
 
         .wallet-box {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: linear-gradient(145deg, rgba(250, 248, 245, 0.9), rgba(243, 239, 230, 0.9));
             padding: 22px 12px;
             border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--soft-border);
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
 
         .wallet-box:hover {
-            background: rgba(255, 255, 255, 0.5);
             border-color: var(--primary-brown);
             transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(74, 51, 39, 0.08);
         }
 
         .wallet-box h3 {
@@ -164,12 +168,12 @@
 
         .screen.active {
             display: block;
-            animation: fadeIn 0.2s ease-in-out;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .counter-display {
@@ -177,7 +181,6 @@
             font-weight: 800;
             color: var(--primary-brown);
             margin: 15px 0 5px 0;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
         }
 
         .symbols-container {
@@ -186,10 +189,10 @@
             margin: 20px 0;
             min-height: 45px;
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(5px);
+            background-color: rgba(250, 248, 245, 0.8);
             border-radius: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.6);
+            border: 1px dashed var(--soft-border);
+            word-break: break-all;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -201,28 +204,30 @@
             overflow-x: auto;
             margin-top: 15px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(6px);
+            border: 1px solid var(--soft-border);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            background-color: rgba(255, 255, 255, 0.9);
             text-align: center;
         }
 
         th, td {
             padding: 12px 8px;
-            border-bottom: 1px solid rgba(230, 223, 213, 0.4);
-            color: var(--text-color);
+            border-bottom: 1px solid var(--accent-beige);
         }
 
         th {
-            background-color: rgba(230, 223, 213, 0.4);
+            background-color: var(--accent-beige);
             color: var(--primary-brown);
             font-weight: 700;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
         }
 
         .action-btns {
@@ -242,25 +247,19 @@
 
         .welcome-badge {
             display: inline-block;
-            background-color: rgba(230, 223, 213, 0.6);
-            backdrop-filter: blur(5px);
+            background-color: var(--accent-beige);
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 14px;
             color: var(--primary-brown);
             margin-bottom: 20px;
             font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .bg-settings-box {
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px dashed rgba(220, 212, 197, 0.5);
-        }
-        
-        .hidden {
-            display: none !important;
+            border-top: 1px dashed var(--soft-border);
         }
     </style>
 </head>
@@ -268,11 +267,11 @@
 
 <div class="container">
 
-    <!-- شاشة تسجيل الاسم (تظهر فقط لأي عضوة جديدة لأول مرة) -->
+    <!-- شاشة تسجيل الاسم -->
     <div id="login-screen" class="screen card">
         <div class="app-title">المحفظة</div>
-        <div class="app-subtitle">أدخلي اسمكِ لمرة واحدة فقط للمتابعة</div>
-        <input type="text" id="username-input" placeholder="اسمكِ هنا...">
+        <div class="app-subtitle">نظام المتابعة والتنظيم السحابي</div>
+        <input type="text" id="username-input" placeholder="اكتبي اسمكِ هنا...">
         <button onclick="registerUser()">دخول للمحفظة</button>
     </div>
 
@@ -292,13 +291,12 @@
             </div>
         </div>
 
-        <!-- إعدادات الخلفية تظهر للمالكة وحدها -->
-        <div id="admin-bg-box" class="bg-settings-box hidden">
+        <!-- إعدادات الخلفية الشخصية -->
+        <div class="bg-settings-box">
             <input type="file" id="bg-file-input" accept="image/*" onchange="previewAndSaveBg(event)">
-            <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية</button>
+            <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية الحالية</button>
         </div>
 
-        <!-- لوحة تحكم المالكة تظهر لك وحدك حصراً -->
         <div id="admin-panel-btn-container" class="hidden">
             <button style="background-color: var(--primary-brown);" onclick="switchScreen('admin-panel')">لوحة تحكم المالكة 👑</button>
         </div>
@@ -309,6 +307,10 @@
         <h2>⭐ محفظة النجوم</h2>
         <div class="counter-display" id="stars-count">0</div>
         <div class="symbols-container" id="stars-symbols"></div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
+            <button class="btn-danger" onclick="modifyStars(-1)">حذف</button>
+        </div>
         <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
@@ -317,10 +319,14 @@
         <h2>🔴 محفظة الإقصاءات</h2>
         <div class="counter-display" id="bans-count">0</div>
         <div class="symbols-container" id="symbols-container-bans"></div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
+            <button class="btn-secondary" onclick="modifyBans(-1)" style="margin-top:0;">حذف</button>
+        </div>
         <button class="btn-secondary" onclick="switchScreen('main-screen')">الرجوع للرئيسية</button>
     </div>
 
-    <!-- لوحة تحكم المالكة الشاملة -->
+    <!-- لوحة تحكم المالكة -->
     <div id="admin-panel" class="screen card">
         <h2>👑 لوحة التحكم</h2>
         <div class="app-subtitle">متابعة العضوات والتحكم الشامل</div>
@@ -344,18 +350,16 @@
 
 </div>
 
+<!-- سكربت Firebase والمنطق البرمجي -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const ADMIN_ID = "8421694319";
-    const ADMIN_USERNAME = "zay_yes3d";
-
-    let myId = "";
-    let myUsername = "";
-    let currentUserName = localStorage.getItem('wallet_user_name') || "";
+    let currentTelegramId = "";
+    let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
     let allUsers = {};
-    let isAdmin = false;
+    let globalBgImage = "";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
@@ -375,199 +379,234 @@
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                myId = String(window.Telegram.WebApp.initDataUnsafe.user.id || "");
-                myUsername = String(window.Telegram.WebApp.initDataUnsafe.user.username || "").toLowerCase();
+                currentTelegramId = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
             }
         }
 
-        // الفحص الدقيق للمالكة بناءً على الآيدي أو اليوزر
-        if (myId === ADMIN_ID || myUsername === ADMIN_USERNAME.toLowerCase()) {
-            isAdmin = true;
-            currentUserName = "زينب (المالكة)";
-            localStorage.setItem('wallet_user_name', currentUserName);
-        }
-
-        const localBg = localStorage.getItem('wallet_bg');
+        // تطبيق الخلفية المخزنة محلياً مؤقتاً لسرعة التحميل
+        const localBg = localStorage.getItem('wallet_custom_bg');
         if (localBg) applyBg(localBg);
 
-        onValue(ref(db), (snapshot) => {
+        // الاستماع لقاعدة البيانات بشكل شامل
+        const dbRef = ref(db);
+        onValue(dbRef, (snapshot) => {
             const data = snapshot.val() || {};
             allUsers = data.users || {};
-
-            if (data.globalBackground && !localBg) {
-                applyBg(data.globalBackground);
+            
+            if (data.globalBackground) {
+                globalBgImage = data.globalBackground;
+                applyBg(globalBgImage);
             }
 
-            if (currentUserName) {
-                if (!allUsers[currentUserName]) {
-                    allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-                    saveDataToCloud();
-                }
-                showMainScreen();
-            } else {
-                document.getElementById('login-screen').classList.add('active');
+            if (currentUserName && allUsers[currentUserName]) {
+                setupUserSession(currentUserName, false);
+            } else if (currentUserName) {
+                allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+                saveDataToCloud();
+                setupUserSession(currentUserName, false);
             }
         });
     };
 
     async function saveDataToCloud() {
         try {
-            set(ref(db, 'users'), allUsers);
-        } catch (e) {}
+            await set(ref(db, 'users'), allUsers);
+        } catch (e) {
+            console.error("خطأ في الحفظ:", e);
+        }
     }
 
-    window.registerUser = function() {
-        const input = document.getElementById('username-input').value.trim();
-        if (!input) {
-            alert("الرجاء إدخال الاسم!");
-            return;
-        }
-        currentUserName = input;
-        localStorage.setItem('wallet_user_name', currentUserName);
-
-        if (!allUsers[currentUserName]) {
-            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-            saveDataToCloud();
-        }
-        showMainScreen();
-    }
-
-    function showMainScreen() {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('main-screen').classList.add('active');
-        document.querySelector('#welcome-user span').innerText = currentUserName;
-
-        // الصلاحيات تظهر للمالكة وحدها فقط
-        if (isAdmin) {
-            document.getElementById('admin-panel-btn-container').classList.remove('hidden');
-            document.getElementById('admin-bg-box').classList.remove('hidden');
-        } else {
-            document.getElementById('admin-panel-btn-container').classList.add('hidden');
-            document.getElementById('admin-bg-box').classList.add('hidden');
-        }
-        updatePreviews();
-    }
-
+    // التنقل بين الشاشات لمنع التداخل نهائياً
     window.switchScreen = function(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-
+        
         if (screenId === 'stars-wallet') updateStarsUI();
         if (screenId === 'bans-wallet') updateBansUI();
-        if (screenId === 'admin-panel' && isAdmin) renderAdminTable();
+        if (screenId === 'admin-panel') renderAdminTable();
         if (screenId === 'main-screen') updatePreviews();
     }
 
+    window.registerUser = async function() {
+        const inputName = document.getElementById('username-input').value.trim();
+        if (!inputName) {
+            alert("الرجاء إدخال الاسم!");
+            return;
+        }
+        currentUserName = inputName;
+        localStorage.setItem('wallet_current_user_name', currentUserName);
+
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        }
+        await saveDataToCloud();
+        setupUserSession(currentUserName, true);
+    }
+
+    function setupUserSession(name, hideLogin) {
+        currentUserName = name;
+        let currentUser = allUsers[currentUserName];
+        if (!currentUser) return;
+
+        if (hideLogin || localStorage.getItem('wallet_current_user_name')) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('main-screen').classList.add('active');
+        }
+
+        document.querySelector('#welcome-user span').innerText = currentUser.name;
+        
+        if (currentTelegramId === ADMIN_ID) {
+            document.getElementById('admin-panel-btn-container').classList.remove('hidden');
+        }
+
+        updatePreviews();
+    }
+
+    window.modifyStars = async function(amount) {
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        }
+        allUsers[currentUserName].stars += amount;
+        if (allUsers[currentUserName].stars < 0) allUsers[currentUserName].stars = 0;
+        
+        updateStarsUI();
+        updatePreviews();
+        await saveDataToCloud();
+    }
+
+    window.modifyBans = async function(amount) {
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        }
+        allUsers[currentUserName].bans += amount;
+        if (allUsers[currentUserName].bans < 0) allUsers[currentUserName].bans = 0;
+        
+        updateBansUI();
+        updatePreviews();
+        await saveDataToCloud();
+    }
+
     function updateStarsUI() {
-        let u = allUsers[currentUserName] || { stars: 0 };
+        let u = allUsers[currentUserName];
+        if(!u) return;
         document.getElementById('stars-count').innerText = u.stars;
         document.getElementById('stars-symbols').innerText = u.stars > 0 ? "⭐".repeat(u.stars) : "لا توجد نجوم بعد";
     }
 
     function updateBansUI() {
-        let u = allUsers[currentUserName] || { bans: 0 };
+        let u = allUsers[currentUserName];
+        if(!u) return;
         document.getElementById('bans-count').innerText = u.bans;
         document.getElementById('symbols-container-bans').innerText = u.bans > 0 ? "🔴".repeat(u.bans) : "سجل نظيف تماماً";
     }
 
     function updatePreviews() {
-        let u = allUsers[currentUserName] || { stars: 0, bans: 0 };
+        let u = allUsers[currentUserName];
+        if(!u) return;
         document.getElementById('preview-stars').innerText = u.stars;
         document.getElementById('preview-bans').innerText = u.bans;
+    }
+
+    window.openAdminPanel = function() {
+        switchScreen('admin-panel');
+        renderAdminTable();
     }
 
     function renderAdminTable() {
         const tbody = document.getElementById('users-table-body');
         tbody.innerHTML = "";
-        const keys = Object.keys(allUsers);
         
-        if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات</td></tr>`;
+        const userKeys = Object.keys(allUsers);
+        if (userKeys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات مسجلات</td></tr>`;
             return;
         }
 
-        keys.forEach((name) => {
-            const user = allUsers[name];
+        userKeys.forEach((userName) => {
+            const user = allUsers[userName];
             tbody.innerHTML += `<tr>
                 <td><strong>${user.name}</strong></td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="btn-secondary mini-btn" onclick="addStarToUser('${name}')" title="إضافة نجمة">⭐+</button>
-                        <button class="btn-secondary mini-btn" onclick="addBanToUser('${name}')" title="إضافة إقصاء">🔴+</button>
-                        <button class="btn-secondary mini-btn" onclick="resetUser('${name}')" title="تصفير">🔄</button>
-                        <button class="btn-danger mini-btn" onclick="deleteUser('${name}')" title="حذف">❌</button>
+                        <button class="btn-secondary mini-btn" onclick="resetUser('${userName}')" title="تصفير">🔄</button>
+                        <button class="btn-danger mini-btn" onclick="deleteUser('${userName}')" title="حذف">❌</button>
                     </div>
                 </td>
             </tr>`;
         });
     }
 
-    window.addStarToUser = function(name) {
-        if (!isAdmin) return;
-        if (allUsers[name]) {
-            allUsers[name].stars = (allUsers[name].stars || 0) + 1;
-            saveDataToCloud();
-            renderAdminTable();
+    window.resetUser = async function(userName) {
+        if (confirm(`تصفير عدادات العضوة: ${userName}؟`)) {
+            if(allUsers[userName]) {
+                allUsers[userName].stars = 0;
+                allUsers[userName].bans = 0;
+                await saveDataToCloud();
+                renderAdminTable();
+                updatePreviews();
+            }
         }
     }
 
-    window.addBanToUser = function(name) {
-        if (!isAdmin) return;
-        if (allUsers[name]) {
-            allUsers[name].bans = (allUsers[name].bans || 0) + 1;
-            saveDataToCloud();
+    window.deleteUser = async function(userName) {
+        if (confirm(`حذف العضوة "${userName}" تماماً؟`)) {
+            delete allUsers[userName];
+            await saveDataToCloud();
             renderAdminTable();
+            
+            if (currentUserName === userName) {
+                localStorage.removeItem('wallet_current_user_name');
+                location.reload();
+            }
         }
     }
 
-    window.resetUser = function(name) {
-        if (!isAdmin) return;
-        if (allUsers[name]) {
-            allUsers[name].stars = 0;
-            allUsers[name].bans = 0;
-            saveDataToCloud();
-            renderAdminTable();
-        }
-    }
-
-    window.deleteUser = function(name) {
-        if (!isAdmin) return;
-        if (confirm(`حذف العضوة "${name}"؟`)) {
-            delete allUsers[name];
-            saveDataToCloud();
-            renderAdminTable();
-        }
-    }
-
+    // دوال إدارة الخلفية (رفع، تعيين للجميع، أو حذف)
     window.previewAndSaveBg = function(event) {
-        if (!isAdmin) return;
         const file = event.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const base64 = e.target.result;
-            localStorage.setItem('wallet_bg', base64);
-            applyBg(base64);
+        reader.onload = async function(e) {
+            const base64Image = e.target.result;
             
-            set(ref(db, 'globalBackground'), base64);
-            alert("تم حفظ وتطبيق الخلفية للجميع بنجاح!");
+            // سؤال المالكة أو المستخدمة: هل ترغبين بتطبيق الخلفية للجميع عبر السحابة أم على جهازك فقط؟
+            const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لجهازك فقط)");
+
+            if (applyToAll && currentTelegramId === ADMIN_ID) {
+                try {
+                    await set(ref(db, 'globalBackground'), base64Image);
+                    alert("تم تحديث الخلفية لجميع العضوات بنجاح!");
+                } catch(err) {
+                    alert("حدث خطأ أثناء رفع الخلفية للسحابة (قد تكون حجم الصورة كبير جداً).");
+                }
+            } else {
+                localStorage.setItem('wallet_custom_bg', base64Image);
+                applyBg(base64Image);
+                alert("تم تعيين الخلفية على جهازك بنجاح!");
+            }
         };
         reader.readAsDataURL(file);
     }
 
-    window.removeBackground = function() {
-        if (!isAdmin) return;
-        localStorage.removeItem('wallet_bg');
-        document.body.style.backgroundImage = "none";
-        set(ref(db, 'globalBackground'), null);
-        alert("تمت إزالة الخلفية.");
+    window.removeBackground = async function() {
+        if (confirm("هل تريدين إزالة الخلفية والعودة للشكل الافتراضي؟")) {
+            localStorage.removeItem('wallet_custom_bg');
+            document.body.style.backgroundImage = "none";
+            
+            if (currentTelegramId === ADMIN_ID) {
+                try {
+                    await set(ref(db, 'globalBackground'), null);
+                } catch(e) {}
+            }
+            alert("تم إزالة الخلفية بنجاح.");
+        }
     }
 
-    function applyBg(url) {
-        document.body.style.backgroundImage = `url('${url}')`;
+    function applyBg(imgUrl) {
+        document.body.style.backgroundImage = `url('${imgUrl}')`;
     }
 </script>
 
