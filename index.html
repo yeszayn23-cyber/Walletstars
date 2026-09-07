@@ -7,20 +7,17 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #f7f4ed;
-            --card-bg: rgba(255, 255, 255, 0.94);
             --primary-brown: #4a3327;
             --light-brown: #8c6d59;
-            --accent-beige: #e6dfd5;
-            --soft-border: #dcd4c5;
+            --accent-beige: rgba(230, 223, 213, 0.5);
+            --soft-border: rgba(220, 212, 197, 0.4);
             --text-color: #332219;
             --danger-color: #b73232;
-            --shadow: 0 10px 30px rgba(74, 51, 39, 0.08);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: #f7f4ed;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -39,15 +36,17 @@
             max-width: 420px;
         }
 
+        /* بطاقات شفافة بالكامل لتظهر الخلفية */
         .card {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: 30px 22px;
             margin-bottom: 20px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 10px 30px rgba(74, 51, 39, 0.05);
             text-align: center;
-            border: 1px solid var(--soft-border);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .app-title {
@@ -55,20 +54,23 @@
             font-weight: 800;
             color: var(--primary-brown);
             margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.6);
         }
 
         .app-subtitle {
             font-size: 14px;
             color: var(--light-brown);
             margin-bottom: 25px;
+            font-weight: 600;
         }
 
         input[type="text"], input[type="file"] {
             width: 90%;
             padding: 12px 16px;
             border-radius: 14px;
-            border: 2px solid var(--accent-beige);
-            background-color: rgba(250, 248, 245, 0.9);
+            border: 2px solid var(--soft-border);
+            background-color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
             color: var(--text-color);
             font-size: 15px;
             margin-bottom: 12px;
@@ -79,7 +81,7 @@
 
         input[type="text"]:focus {
             border-color: var(--primary-brown);
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8);
         }
 
         button {
@@ -111,9 +113,15 @@
         }
 
         .btn-secondary {
-            background-color: var(--accent-beige);
+            background-color: rgba(230, 223, 213, 0.7);
+            backdrop-filter: blur(5px);
             color: var(--primary-brown);
             box-shadow: none;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(212, 203, 192, 0.9);
         }
 
         .wallet-grid {
@@ -123,16 +131,20 @@
             margin-top: 20px;
         }
 
+        /* مربعات المحافظ شفافة تماماً */
         .wallet-box {
-            background: linear-gradient(145deg, rgba(250, 248, 245, 0.9), rgba(243, 239, 230, 0.9));
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             padding: 22px 12px;
             border-radius: 18px;
-            border: 1px solid var(--soft-border);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .wallet-box:hover {
+            background: rgba(255, 255, 255, 0.5);
             border-color: var(--primary-brown);
             transform: translateY(-3px);
         }
@@ -169,6 +181,7 @@
             font-weight: 800;
             color: var(--primary-brown);
             margin: 15px 0 5px 0;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
         }
 
         .symbols-container {
@@ -177,9 +190,10 @@
             margin: 20px 0;
             min-height: 45px;
             padding: 10px;
-            background-color: rgba(250, 248, 245, 0.8);
+            background-color: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(5px);
             border-radius: 12px;
-            border: 1px dashed var(--soft-border);
+            border: 1px dashed rgba(255, 255, 255, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -191,24 +205,26 @@
             overflow-x: auto;
             margin-top: 15px;
             border-radius: 12px;
-            border: 1px solid var(--soft-border);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(6px);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            background-color: rgba(255, 255, 255, 0.9);
             text-align: center;
         }
 
         th, td {
             padding: 12px 8px;
-            border-bottom: 1px solid var(--accent-beige);
+            border-bottom: 1px solid rgba(230, 223, 213, 0.4);
+            color: var(--text-color);
         }
 
         th {
-            background-color: var(--accent-beige);
+            background-color: rgba(230, 223, 213, 0.4);
             color: var(--primary-brown);
             font-weight: 700;
         }
@@ -230,19 +246,21 @@
 
         .welcome-badge {
             display: inline-block;
-            background-color: var(--accent-beige);
+            background-color: rgba(230, 223, 213, 0.6);
+            backdrop-filter: blur(5px);
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 14px;
             color: var(--primary-brown);
             margin-bottom: 20px;
             font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .bg-settings-box {
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px dashed var(--soft-border);
+            border-top: 1px dashed rgba(220, 212, 197, 0.5);
         }
         
         .hidden {
@@ -254,7 +272,7 @@
 
 <div class="container">
 
-    <!-- شاشة تسجيل الاسم المؤقتة للعضوات الجدد -->
+    <!-- شاشة تسجيل الاسم للعضوات الجدد -->
     <div id="login-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="app-subtitle">أدخلي اسمكِ لمرة واحدة فقط للمتابعة</div>
@@ -284,7 +302,7 @@
             <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية</button>
         </div>
 
-        <!-- زر لوحة التحكم يظهر لك وحدك حصراً -->
+        <!-- لوحة التحكم تظهر لك وحدك حصراً -->
         <div id="admin-panel-btn-container" class="hidden">
             <button style="background-color: var(--primary-brown);" onclick="switchScreen('admin-panel')">لوحة تحكم المالكة 👑</button>
         </div>
@@ -374,18 +392,16 @@
             }
         }
 
-        // التحقق الحصري للمالكة بناءً على الآيدي أو اليوزر الدقيق
+        // التحقق الحصري الصارم للمالكة
         if (myId === ADMIN_ID || myUsername === ADMIN_USERNAME.toLowerCase()) {
             isAdmin = true;
             currentUserName = "زينب (المالكة)";
             localStorage.setItem('wallet_user_name', currentUserName);
         }
 
-        // تحميل الخلفية الخاصة
         const localBg = localStorage.getItem('wallet_bg');
         if (localBg) applyBg(localBg);
 
-        // جلب البيانات بخفة وسرعة فائقة
         onValue(ref(db), (snapshot) => {
             const data = snapshot.val() || {};
             allUsers = data.users || {};
@@ -403,7 +419,7 @@
             } else {
                 document.getElementById('login-screen').classList.add('active');
             }
-        }, { onlyOnce: false });
+        });
     };
 
     async function saveDataToCloud() {
@@ -433,6 +449,7 @@
         document.getElementById('main-screen').classList.add('active');
         document.querySelector('#welcome-user span').innerText = currentUserName;
 
+        // الصلاحيات تظهر للمالكة وحدها
         if (isAdmin) {
             document.getElementById('admin-panel-btn-container').classList.remove('hidden');
             document.getElementById('stars-actions').classList.remove('hidden');
