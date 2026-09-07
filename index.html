@@ -156,12 +156,12 @@
 
         .screen.active {
             display: block;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.2s ease-in-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .counter-display {
@@ -254,15 +254,15 @@
 
 <div class="container">
 
-    <!-- شاشة تسجيل الاسم -->
+    <!-- شاشة تسجيل الاسم المؤقتة للعضوات الجدد -->
     <div id="login-screen" class="screen card">
         <div class="app-title">المحفظة</div>
-        <div class="app-subtitle">نظام المتابعة والتنظيم السحابي</div>
-        <input type="text" id="username-input" placeholder="اكتبي اسمكِ هنا...">
-        <button onclick="registerUser()">دخول للمحفظة</button>
+        <div class="app-subtitle">أدخلي اسمكِ لمرة واحدة فقط للمتابعة</div>
+        <input type="text" id="username-input" placeholder="اسمكِ هنا...">
+        <button onclick="registerUser()">دخول سريع</button>
     </div>
 
-    <!-- الشاشة الرئيسية للمستخدمة -->
+    <!-- الشاشة الرئيسية -->
     <div id="main-screen" class="screen card">
         <div class="app-title">المحفظة</div>
         <div class="welcome-badge" id="welcome-user">أهلاً بكِ، <span></span></div>
@@ -278,12 +278,13 @@
             </div>
         </div>
 
-        <!-- إعدادات الخلفية الشخصية -->
+        <!-- إعدادات الخلفية -->
         <div class="bg-settings-box">
             <input type="file" id="bg-file-input" accept="image/*" onchange="previewAndSaveBg(event)">
             <button class="btn-secondary" onclick="removeBackground()">حذف الخلفية</button>
         </div>
 
+        <!-- زر لوحة التحكم يظهر لك وحدك حصراً -->
         <div id="admin-panel-btn-container" class="hidden">
             <button style="background-color: var(--primary-brown);" onclick="switchScreen('admin-panel')">لوحة تحكم المالكة 👑</button>
         </div>
@@ -294,7 +295,7 @@
         <h2>⭐ محفظة النجوم</h2>
         <div class="counter-display" id="stars-count">0</div>
         <div class="symbols-container" id="stars-symbols"></div>
-        <div style="display: flex; gap: 10px;">
+        <div id="stars-actions" style="display: flex; gap: 10px;" class="hidden">
             <button onclick="modifyStars(1)">إضافة نجمة ⭐</button>
             <button class="btn-danger" onclick="modifyStars(-1)">حذف</button>
         </div>
@@ -306,7 +307,7 @@
         <h2>🔴 محفظة الإقصاءات</h2>
         <div class="counter-display" id="bans-count">0</div>
         <div class="symbols-container" id="symbols-container-bans"></div>
-        <div style="display: flex; gap: 10px;">
+        <div id="bans-actions" style="display: flex; gap: 10px;" class="hidden">
             <button class="btn-danger" onclick="modifyBans(1)">إضافة إقصاء 🔴</button>
             <button class="btn-secondary" onclick="modifyBans(-1)" style="margin-top:0;">حذف</button>
         </div>
@@ -341,13 +342,14 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // سنعتمد على معرف تليجرام الفرعي، وسنضع الآيدي الخاص بكِ هنا مباشرة لتظهر اللوحة عندك وحدك
-    // إذا كنت لا تعرفين آيديك الرقمي، يمكنك وضعه هنا مباشرة (سنضبطه ليقبل بصمة جهازك أو اسمك الأساسي أيضاً كحماية إضافية)
-    const ADMIN_TELEGRAM_ID = "8421694319"; 
-    
-    let currentTelegramId = "";
-    let currentUserName = localStorage.getItem('wallet_current_user_name') || "";
+    const ADMIN_ID = "8421694319";
+    const ADMIN_USERNAME = "zay_yes3d";
+
+    let myId = "";
+    let myUsername = "";
+    let currentUserName = localStorage.getItem('wallet_user_name') || "";
     let allUsers = {};
+    let isAdmin = false;
 
     const firebaseConfig = {
         apiKey: "AIzaSyDZsmaDCvrVzplI01FOaPdRAXfZ5psYabE",
@@ -367,188 +369,170 @@
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                currentTelegramId = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+                myId = String(window.Telegram.WebApp.initDataUnsafe.user.id || "");
+                myUsername = String(window.Telegram.WebApp.initDataUnsafe.user.username || "").toLowerCase();
             }
         }
 
-        // جلب الخلفية المحفوظة محلياً أو سحابياً
-        const localBg = localStorage.getItem('wallet_custom_bg_' + currentUserName);
+        // التحقق الحصري للمالكة بناءً على الآيدي أو اليوزر الدقيق
+        if (myId === ADMIN_ID || myUsername === ADMIN_USERNAME.toLowerCase()) {
+            isAdmin = true;
+            currentUserName = "زينب (المالكة)";
+            localStorage.setItem('wallet_user_name', currentUserName);
+        }
+
+        // تحميل الخلفية الخاصة
+        const localBg = localStorage.getItem('wallet_bg');
         if (localBg) applyBg(localBg);
 
-        const dbRef = ref(db);
-        onValue(dbRef, (snapshot) => {
+        // جلب البيانات بخفة وسرعة فائقة
+        onValue(ref(db), (snapshot) => {
             const data = snapshot.val() || {};
             allUsers = data.users || {};
-            
-            // التحقق من الخلفية العامة إن وجدت
+
             if (data.globalBackground && !localBg) {
                 applyBg(data.globalBackground);
             }
 
-            if (currentUserName && allUsers[currentUserName]) {
-                setupUserSession(currentUserName, false);
-            } else if (currentUserName) {
-                allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-                saveDataToCloud();
-                setupUserSession(currentUserName, false);
+            if (currentUserName) {
+                if (!allUsers[currentUserName]) {
+                    allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+                    saveDataToCloud();
+                }
+                showMainScreen();
+            } else {
+                document.getElementById('login-screen').classList.add('active');
             }
-        });
+        }, { onlyOnce: false });
     };
 
     async function saveDataToCloud() {
         try {
-            await set(ref(db, 'users'), allUsers);
-        } catch (e) {
-            console.error("خطأ في الحفظ:", e);
+            set(ref(db, 'users'), allUsers);
+        } catch (e) {}
+    }
+
+    window.registerUser = function() {
+        const input = document.getElementById('username-input').value.trim();
+        if (!input) {
+            alert("الرجاء إدخال الاسم!");
+            return;
         }
+        currentUserName = input;
+        localStorage.setItem('wallet_user_name', currentUserName);
+
+        if (!allUsers[currentUserName]) {
+            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+            saveDataToCloud();
+        }
+        showMainScreen();
+    }
+
+    function showMainScreen() {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('main-screen').classList.add('active');
+        document.querySelector('#welcome-user span').innerText = currentUserName;
+
+        if (isAdmin) {
+            document.getElementById('admin-panel-btn-container').classList.remove('hidden');
+            document.getElementById('stars-actions').classList.remove('hidden');
+            document.getElementById('bans-actions').classList.remove('hidden');
+        } else {
+            document.getElementById('admin-panel-btn-container').classList.add('hidden');
+            document.getElementById('stars-actions').classList.add('hidden');
+            document.getElementById('bans-actions').classList.add('hidden');
+        }
+        updatePreviews();
     }
 
     window.switchScreen = function(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-        
+
         if (screenId === 'stars-wallet') updateStarsUI();
         if (screenId === 'bans-wallet') updateBansUI();
-        if (screenId === 'admin-panel') renderAdminTable();
+        if (screenId === 'admin-panel' && isAdmin) renderAdminTable();
         if (screenId === 'main-screen') updatePreviews();
     }
 
-    window.registerUser = async function() {
-        const inputName = document.getElementById('username-input').value.trim();
-        if (!inputName) {
-            alert("الرجاء إدخال الاسم!");
-            return;
-        }
-        currentUserName = inputName;
-        localStorage.setItem('wallet_current_user_name', currentUserName);
-
-        if (!allUsers[currentUserName]) {
-            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-        }
-        await saveDataToCloud();
-        setupUserSession(currentUserName, true);
-    }
-
-    function setupUserSession(name, hideLogin) {
-        currentUserName = name;
-        let currentUser = allUsers[currentUserName];
-        if (!currentUser) return;
-
-        if (hideLogin || localStorage.getItem('wallet_current_user_name')) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('main-screen').classList.add('active');
-        }
-
-        document.querySelector('#welcome-user span').innerText = currentUser.name;
-        
-        // التحقق القاطع: تظهر لوحة التحكم فقط إذا كان الآيدي يطابق آيديك أو إذا كان اسمك هو اسم المالكة الأساسي
-        if (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب" || currentUserName === "أم غيمة") {
-            document.getElementById('admin-panel-btn-container').classList.remove('hidden');
-        } else {
-            document.getElementById('admin-panel-btn-container').classList.add('hidden');
-        }
-
-        updatePreviews();
-    }
-
     window.modifyStars = async function(amount) {
-        if (!allUsers[currentUserName]) {
-            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-        }
-        allUsers[currentUserName].stars += amount;
-        if (allUsers[currentUserName].stars < 0) allUsers[currentUserName].stars = 0;
-        
+        if (!isAdmin) return;
+        if (!allUsers[currentUserName]) allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        allUsers[currentUserName].stars = Math.max(0, allUsers[currentUserName].stars + amount);
         updateStarsUI();
         updatePreviews();
-        await saveDataToCloud();
+        saveDataToCloud();
     }
 
     window.modifyBans = async function(amount) {
-        if (!allUsers[currentUserName]) {
-            allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
-        }
-        allUsers[currentUserName].bans += amount;
-        if (allUsers[currentUserName].bans < 0) allUsers[currentUserName].bans = 0;
-        
+        if (!isAdmin) return;
+        if (!allUsers[currentUserName]) allUsers[currentUserName] = { name: currentUserName, stars: 0, bans: 0 };
+        allUsers[currentUserName].bans = Math.max(0, allUsers[currentUserName].bans + amount);
         updateBansUI();
         updatePreviews();
-        await saveDataToCloud();
+        saveDataToCloud();
     }
 
     function updateStarsUI() {
-        let u = allUsers[currentUserName];
-        if(!u) return;
+        let u = allUsers[currentUserName] || { stars: 0 };
         document.getElementById('stars-count').innerText = u.stars;
         document.getElementById('stars-symbols').innerText = u.stars > 0 ? "⭐".repeat(u.stars) : "لا توجد نجوم بعد";
     }
 
     function updateBansUI() {
-        let u = allUsers[currentUserName];
-        if(!u) return;
+        let u = allUsers[currentUserName] || { bans: 0 };
         document.getElementById('bans-count').innerText = u.bans;
         document.getElementById('symbols-container-bans').innerText = u.bans > 0 ? "🔴".repeat(u.bans) : "سجل نظيف تماماً";
     }
 
     function updatePreviews() {
-        let u = allUsers[currentUserName];
-        if(!u) return;
+        let u = allUsers[currentUserName] || { stars: 0, bans: 0 };
         document.getElementById('preview-stars').innerText = u.stars;
         document.getElementById('preview-bans').innerText = u.bans;
-    }
-
-    window.openAdminPanel = function() {
-        switchScreen('admin-panel');
-        renderAdminTable();
     }
 
     function renderAdminTable() {
         const tbody = document.getElementById('users-table-body');
         tbody.innerHTML = "";
+        const keys = Object.keys(allUsers);
         
-        const userKeys = Object.keys(allUsers);
-        if (userKeys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات مسجلات</td></tr>`;
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--light-brown);">لا توجد عضوات</td></tr>`;
             return;
         }
 
-        userKeys.forEach((userName) => {
-            const user = allUsers[userName];
+        keys.forEach((name) => {
+            const user = allUsers[name];
             tbody.innerHTML += `<tr>
                 <td><strong>${user.name}</strong></td>
                 <td>⭐ ${user.stars}</td>
                 <td>🔴 ${user.bans}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="btn-secondary mini-btn" onclick="resetUser('${userName}')" title="تصفير">🔄</button>
-                        <button class="btn-danger mini-btn" onclick="deleteUser('${userName}')" title="حذف">❌</button>
+                        <button class="btn-secondary mini-btn" onclick="resetUser('${name}')">🔄</button>
+                        <button class="btn-danger mini-btn" onclick="deleteUser('${name}')">❌</button>
                     </div>
                 </td>
             </tr>`;
         });
     }
 
-    window.resetUser = async function(userName) {
-        if (confirm(`تصفير عدادات العضوة: ${userName}؟`)) {
-            if(allUsers[userName]) {
-                allUsers[userName].stars = 0;
-                allUsers[userName].bans = 0;
-                await saveDataToCloud();
-                renderAdminTable();
-                updatePreviews();
-            }
+    window.resetUser = function(name) {
+        if (!isAdmin) return;
+        if (allUsers[name]) {
+            allUsers[name].stars = 0;
+            allUsers[name].bans = 0;
+            saveDataToCloud();
+            renderAdminTable();
         }
     }
 
-    window.deleteUser = async function(userName) {
-        if (confirm(`حذف العضوة "${userName}" تماماً؟`)) {
-            delete allUsers[userName];
-            await saveDataToCloud();
+    window.deleteUser = function(name) {
+        if (!isAdmin) return;
+        if (confirm(`حذف ${name}؟`)) {
+            delete allUsers[name];
+            saveDataToCloud();
             renderAdminTable();
-            
-            if (currentUserName === userName) {
-                localStorage.removeItem('wallet_current_user_name');
-                location.reload();
-            }
         }
     }
 
@@ -557,45 +541,28 @@
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = async function(e) {
-            const base64Image = e.target.result;
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            localStorage.setItem('wallet_bg', base64);
+            applyBg(base64);
             
-            // ضغط الصورة وحفظها محلياً لضمان عدم اختفائها أبداً
-            localStorage.setItem('wallet_custom_bg_' + currentUserName, base64Image);
-            applyBg(base64Image);
-            
-            const applyToAll = confirm("هل تريدين تطبيق هذه الخلفية كخلفية رسمية لجميع المستخدمات في السحابة؟\n(اضغطي 'موافق' للجميع، أو 'إلغاء' لحسابك هذا فقط)");
-
-            if (applyToAll && (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب")) {
-                try {
-                    await set(ref(db, 'globalBackground'), base64Image);
-                    alert("تم تعيين الخلفية للجميع بنجاح!");
-                } catch(err) {
-                    alert("حجم الصورة كبير جداً على السحابة، تم حفظها على جهازك بنجاح.");
-                }
-            } else {
-                alert("تم حفظ الخلفية بنجاح!");
+            if (isAdmin && confirm("تطبيق الخلفية للجميع في السحابة؟")) {
+                set(ref(db, 'globalBackground'), base64);
             }
+            alert("تم حفظ الخلفية بنجاح!");
         };
         reader.readAsDataURL(file);
     }
 
-    window.removeBackground = async function() {
-        if (confirm("هل تريدين إزالة الخلفية؟")) {
-            localStorage.removeItem('wallet_custom_bg_' + currentUserName);
-            document.body.style.backgroundImage = "none";
-            
-            if (currentTelegramId === ADMIN_TELEGRAM_ID || currentUserName === "زينب") {
-                try {
-                    await set(ref(db, 'globalBackground'), null);
-                } catch(e) {}
-            }
-            alert("تم إزالة الخلفية بنجاح.");
-        }
+    window.removeBackground = function() {
+        localStorage.removeItem('wallet_bg');
+        document.body.style.backgroundImage = "none";
+        if (isAdmin) set(ref(db, 'globalBackground'), null);
+        alert("تمت الإزالة.");
     }
 
-    function applyBg(imgUrl) {
-        document.body.style.backgroundImage = `url('${imgUrl}')`;
+    function applyBg(url) {
+        document.body.style.backgroundImage = `url('${url}')`;
     }
 </script>
 
